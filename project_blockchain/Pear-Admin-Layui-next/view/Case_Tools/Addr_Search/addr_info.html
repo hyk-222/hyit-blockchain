@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>地址信息</title>
+    <link href="../../../component/pear/css/pear.css" rel="stylesheet" />
+</head>
+<body class="pear-container">
+   <div class="layui-card">    <!--  layui-card-->
+       <div class="layui-card-header">地址信息&nbsp;&nbsp;&nbsp;&nbsp;
+           <button id ="fanhui" class="loading-1 pear-btn pear-btn-primary" plain >返回</button>
+       </div>
+       <div class="layui-card-body">
+           <div>
+               <label id="copy1">000000000000288bb2cdbd907a32fdff4b8d9dbc154204acc347fedec&nbsp;&nbsp;&nbsp;&nbsp;
+                   <button id ="copytext" class="loading-1 pear-btn pear-btn-primary" plain >复制</button>
+               </label>
+               <br>
+               <br>
+           </div>
+           <button class="loading-1 pear-btn pear-btn-primary" plain id ="yanpan">+ 地址研判</button>
+           <button class="loading-3 pear-btn pear-btn-danger" plain id="jiankong">+ 地址监控</button>
+           <button id="liushui" class="loading-2 pear-btn pear-btn-success" plain >+ 交易流水</button>
+<!--				<button class="loading-4 pear-btn pear-btn-warming" plain>加载</button>-->
+<!--				<button class="loading-5 pear-btn">加载</button>-->
+       </div>
+   </div>
+   <div class="layui-card">
+   <div class="layui-col-md6">
+       <div class="layui-card">
+<!--			<div class="layui-card-header"> </div>-->
+           <div class="layui-card-body">
+<!--                <div class="layui-col-md4">-->
+               <span>loading.Load(2,message);</span>
+               <br>
+               <br>
+               <span>loading.Load(3,message);</span>
+               <br>
+               <br>
+               <span>loading.Load(4,message);</span>
+               <br>
+               <br>
+               <span>loading.Load(5,message);</span>
+               <br>
+               <br>
+               <span>loading.remove(time);</span>
+               <br>
+               <br>
+           </div>
+       </div>
+   </div>
+
+   <div class="layui-col-md6">
+       <div class="layui-card">
+<!--			<div class="layui-card-header"> </div>-->
+           <div class="layui-card-body">
+<!--                <div class="layui-col-md4">-->
+
+               <span class="icon pear-icon">&#xe68b;</span>
+               <span>标签：</span>
+               <span>       </span>
+               <br>
+               <br>
+               <span class="icon pear-icon">&#xe697;</span>
+               <span>标注：</span>
+               <span>       </span>
+               <br>
+               <br>
+               <br>
+               <br>
+               <br>
+               <br>
+               <br>
+               <br>
+           </div>
+       </div>
+   </div>
+   </div>
+
+   <div class="layui-card layui-col-md12 layui-col-xs16 layui-col-space70">    <!--  layui-card-->
+       <div class="layui-card-header">地址信息&nbsp;&nbsp;&nbsp;&nbsp;
+
+       </div>
+       <div class="layui-card-body">
+           <table id="user-table" lay-filter="user-table"></table>
+       </div>
+   </div>
+
+
+
+
+
+
+
+
+    <script src="../../../component/layui/layui.js"></script>
+    <script src="../../../component/pear/pear.js"></script>
+    <script>
+			layui.use(['jquery','layer'], function() {
+				var $ = layui.jquery;
+
+				$("#fanhui").click(function(){
+					window.location = '../../../view/Case_Tools/Addr_Search/index.html'
+				});
+				$("#liushui").click(function(){
+					window.location = '../../../view/Case_Tools/Trans_Flow/index.html'
+				});
+				$("#yanpan").click(function(){
+					window.location = '../../../view/Visual_Analysis/Addr_Judge/index.html'
+				});
+			})
+	</script>
+    <script>
+        function copyText() {
+            var text = document.getElementById("text").innerText;
+            var input = document.getElementById("input");
+            input.value = text; // 修改文本框的内容
+            input.select(); // 选中文本
+            document.execCommand("copy"); // 执行浏览器复制命令
+            alert("复制成功");
+    </script>
+
+    <script>
+			layui.use(['table', 'form', 'jquery', 'drawer', 'dropdown'], function() {
+				let table = layui.table;
+				let form = layui.form;
+				let $ = layui.jquery;
+				let drawer = layui.drawer;
+				let dropdown = layui.dropdown;
+
+				let MODULE_PATH = "/system/user/";
+
+				let cols = [
+					[
+						{
+							title: '地址',
+							field: 'username',
+							align: 'center',
+						},
+						{
+							title: '金额',
+							field: 'sex',
+							align: 'center',
+
+						}
+					]
+				]
+
+				table.render({
+					elem: '#user-table',
+					url: '../../../admin/data/table.json',
+					page: true,
+					cols: cols,
+					skin: 'line',
+
+					done: function(res, curr, count) {
+						for (var i = 0; i < res.data.length; i++) {
+							dropdown.render({
+								elem: '#more_' + res.data[i].userId,
+
+							});
+						}
+					}
+				});
+
+				form.on('submit(user-query)', function(data) {
+					table.reload('user-table', {
+						where: data.field
+					})
+					return false;
+				});
+
+				form.on('switch(user-enable)', function(obj) {
+					layer.tips(this.value + ' ' + this.name + '：' + obj.elem.checked, obj.othis);
+				});
+
+			})
+	</script>
+</body>
+</html>

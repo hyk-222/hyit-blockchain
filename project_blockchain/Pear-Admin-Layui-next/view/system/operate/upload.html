@@ -1,0 +1,54 @@
+<body class="layui-layout-body">
+ 
+<div class="layui-upload" align="center">
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;" align="center">
+        <legend>请选择您要上传的Excel文件</legend>
+    </fieldset>
+
+    <div style="margin-top: 30px" align="center">
+        <button id="importData" class="layui-btn layui-btn-normal">导入</button>
+    </div>
+</div>
+
+</div>
+
+<script src="../../layui/layui.js" th:src="@{/layui/layui.js}"></script>
+<script th:src="@{/js/jquery-3.4.0.min.js}"></script>
+
+<script th:inline="javascript">
+
+    ctxPath = /*[[@{/}]]*/ '';
+
+    layui.use(["element", "layer", "upload"], function () {
+        var layer = layui.layer;
+        layui.upload.render({
+            elem: "#importData",
+            url: ctxPath + 'xx/upload',
+            size: '800',
+            accept: "file",
+            exts: 'xls|xlsx',
+            before: function () {
+                layer.load();
+            },
+            done: function (result) {
+                if (result.code === 0) {
+                    layer.msg(result.message, {icon: 1, time: 1000}, function () {
+                        var index = parent.layer.getFrameIndex(window.name);
+                        parent.layer.close(index);
+                        parent.$('.layui-laypage-btn').click();
+                    });
+                } else if (result.code === -1) {
+                    layer.msg(result.message, {icon: 5, time: 2500}, function () {
+                        var index = parent.layer.getFrameIndex(window.name);
+                        parent.layer.close(index);
+                        parent.$('.layui-laypage-btn').click();
+                    });
+                }
+                layer.closeAll('loading');
+            }
+        });
+    });
+
+</script>
+</body>
+</html>

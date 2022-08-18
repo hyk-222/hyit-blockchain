@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>上传excel界面</title>
+		<link rel="stylesheet" href="../../../component/pear/css/pear.css" />
+		<style>
+			.layui-input1 {
+				height: 22px !important;
+				line-height: 22px !important;
+				padding-left: 15px !important;
+				border-radius: 3px !important;
+			}
+			.layui-input1:focus {
+				box-shadow: 0px 0px 2px 1px #5FB878 !important;
+			}
+		</style>
+	</head>
+	<body>
+		        <div class="layui-row " style="width: 900px; padding: 20px; margin: auto auto; background-color: #f2f2f2">
+            <form class="layui-form" action="" >
+            <div class="layui-upload layui-col-md4 layui-col-space30" style="margin-left: 80px">
+                <label class="layui-form-label" style="font-size: 15px;">图书封面</label>
+                <div class="layui-upload-list ">
+                    <p id="demoText"></p>
+                    <div style="width:220px;height:300px;background: white;margin-top: 20px"><img class="layui-upload-img" id="demo1"></div>
+
+                </div>
+
+                <button type="button" class="layui-btn" id="test3" style="margin-left: 20px" >选择图片</button>
+                <button id="hideUpload" type="button" style="display: none"></button>
+            </div>
+
+            <div class="layui-col-md7 layui-col-space10 " style="font-size: 15px;" >
+                <div class="layui-form-item" >
+                        <label class="layui-form-label">ID</label>
+                        <div class="layui-input-inline" style="width: 45%">
+                            <input id="bookId" lay-verify="number" type="text" name="bookId" placeholder="请输入图书Id(唯一)"
+                                   autocomplete="off" class="layui-input" >
+                        </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">书 名</label>
+                    <div class="layui-input-inline" style="width: 45%">
+                        <input required lay-verify="required" id="bookName" type="text" name="bookName"
+                               placeholder="请输入书名" autofocus
+                               class="layui-input" autocomplete="off">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">作 者</label>
+                    <div class="layui-input-inline" style="width: 45%">
+                        <input id="bookAuthor" lay-verify="required" type="text" name="bookAuthor" placeholder="请输入作者"
+                               autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">出版社</label>
+                    <div class="layui-input-inline" style="width: 45%">
+                        <input id="publish" lay-verify="required" type="text" name="publish"
+                               placeholder="请输入出版社" autocomplete="off"
+                               class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">页 数</label>
+                    <div class="layui-input-inline" style="width: 45%" >
+                        <input id="pages" lay-verify="number" type="text" name="pages"
+                               placeholder="请输入页数" autocomplete="off"
+                               class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">价 格</label>
+                    <div class="layui-input-inline" style="width: 45%">
+                        <input id="price" lay-verify="number" type="text" name="price" placeholder="￥"
+                               autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">评分</label>
+                    <div class="layui-input-inline" style="width: 45%">
+                        <input id="bookGrade" lay-verify="number" type="text" name="bookGrade"
+                               placeholder="请输入评分" autocomplete="off"
+                               class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">ISBN</label>
+                    <div class="layui-input-inline" style="width: 45%">
+                        <input id="isbn" lay-verify="required" type="text" name="isbn"
+                               placeholder="请输入ISBN" autocomplete="off"
+                               class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-form-item layui-form-text">
+                    <label class="layui-form-label">简 介</label>
+                    <div class="layui-input-inline" style="width: 45%" >
+                    <textarea id="bookIntro" lay-verify="required" name="bookIntro" placeholder="请输入简介"
+                              class="layui-textarea "
+                              autocomplete="off"></textarea>
+                    </div>
+                </div>
+        </div>
+
+
+
+            <div class="layui-form-item layui-row">
+                <div class="layui-input-block" style="width:300px;margin: auto; margin-top: 20px">
+                    <button class="layui-btn" lay-submit="" lay-filter="submit" id="add">立即提交</button>
+                </div>
+            </div>
+            </form>
+        </div>
+
+
+    </div>
+
+		<script src="../../../component/layui/layui.js"></script>
+		<script src="../../../component/pear/pear.js"></script>
+		<script>
+
+
+layui.use(["jquery", "upload", "form", "layer", "element"], function () {
+    var $ = layui.$,
+        element = layui.element,
+        layer = layui.layer,
+        upload = layui.upload,
+        form = layui.form;
+    //监听提交
+    form.on('submit(submit)', function(data){
+        var date = new Date();
+            subData = {
+            bookId: data.field.bookId,
+            bookName:data.field.bookName,
+            bookAuthor: data.field.bookAuthor,
+            publish: data.field.publish,
+            pages: data.field.pages,
+            price: data.field.price,
+            bookGrade: data.field.bookGrade,
+            isbn: data.field.isbn,
+            bookIntro: data.field.bookIntro
+        }
+        $.ajax({
+            type:'post',
+            url:'http://127.0.0.1:8000/vpn_insertexcel_u',
+            data:subData,
+            success:(res)=>{
+                if(res.code == 0){
+                    // 触发隐藏按的上传按钮
+                    $('#hideUpload').trigger('click');
+                    layer.msg("图书信息提交成功!", {
+                        time: 1000
+                    });
+
+
+                }else{
+                    layer.msg("图书信息提交失败!请重新填写！", {
+                        time: 3000
+                    }, function() {
+                        //重新加载页面
+                        location.reload();
+                    })
+                }
+            },
+            error:(err)=>{
+                layer.msg("图书信息提交失败!", {
+                    time: 1000
+                }, function() {
+                    //重新加载页面
+                    location.reload();
+                })
+            }
+        });
+        return false;
+    });
+
+    //图片上传
+    var uploadInst = upload.render({
+        elem: '#test3'
+        ,url: 'http://127.0.0.1:8000/vpn_insertexcel_u'
+        ,accept: 'file' //普通文件
+        ,exts: 'xls|xlsx' //允许上传的文件后缀
+        ,auto:false
+        ,bindAction:'#hideUpload'
+        ,data:{                         //访问后台提交的数据
+            // name: $('#a').val()
+            fileName:()=>{
+                return $('#upload_name').val();//官方文档说明：实现动态传值
+            }
+        }
+        ,done: function(res){//返回值接收
+         console.log(res)
+         if(res.success==true){
+                var Record_number=res.count
+               console.log(Record_number)
+                layer.msg('共'+res.count+'条数据,'+'导入成功！成功导入'+res.true_number+'条数据！', {
+                  }, function(){
+                    parent.layer.close(parent.layer.getFrameIndex(window
+                                .name)); //关闭当前页
+                            parent.layui.table.reload("user-table");
+                    location.reload();
+                  });
+                }else if(res.success==false){
+                    layer.msg('共'+res.count+'条数据,'+'导入失败！有'+res.false_number+'条数据号码重复！', {
+                      }, function(){
+                        parent.layer.close(parent.layer.getFrameIndex(window
+                                .name)); //关闭当前页
+                            parent.layui.table.reload("user-table");
+                        location.reload();
+                      });
+                    }
+                else if(res.success=='other!'){
+                    layer.msg('共'+res.count+'条数据,'+'成功导入'+res.true_number+'条数据！有'+res.false_number+'号码重复！', {
+                      }, function(){
+                        parent.layer.close(parent.layer.getFrameIndex(window
+                                .name)); //关闭当前页
+                            parent.layui.table.reload("user-table");
+                        location.reload();
+                      });
+						}
+				}
+        // elem: '#test1'         //绑定点击按钮
+        // ,url: '/upload'     //访问后台路径
+        // ,accept: 'images'               //图片格式
+        // ,auto:false                     //取消自动上传
+        // ,method: 'post'                 //请求上传的 http 类型
+        // ,bindAction:'#hideUpload'       //绑定真正的上传按钮
+        // ,data:{                         //访问后台提交的数据
+        //     // name: $('#a').val()
+        //     fileName:()=>{
+        //         return $('#bookId').val();//官方文档说明：实现动态传值
+        //     }
+        // }
+        // ,choose: function(obj){
+        //     //预读本地文件示例，不支持ie8
+        //     obj.preview(function(index, file, result){
+        //         $('#demo1').attr({src: result,width:"220",height:"300"});//图片链接（base64）
+        //     });
+        // }
+        // ,done: function(res){
+        //
+        //     //如果上传失败
+        //     if(res.code > 0){
+        //         return layer.msg('图片上传失败！');
+        //     }
+        //     //上传成功
+        //     layer.msg("图片上传成功!", {
+        //         time: 1000
+        //     }, function() {
+        //         //重新加载页面
+        //         location.reload();
+        //     });
+        // }
+        // ,error: function(){
+        //     //演示失败状态，并实现重传
+        //     var demoText = $('#demoText');
+        //     demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
+        //     demoText.find('.demo-reload').on('click', function(){
+        //         uploadInst.upload();
+        //     });
+        // }
+    });
+});
+
+
+
+
+		</script>
+		<script>
+		</script>
+	</body>
+</html>

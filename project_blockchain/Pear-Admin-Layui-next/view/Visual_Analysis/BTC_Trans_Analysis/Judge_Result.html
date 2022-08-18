@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>控制后台</title>
+		<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+
+   	 	<!-- 先引入 Vue -->
+    	<script src="https://unpkg.com/vue/dist/vue.js"></script>
+    	<!-- 引入 http-vue-loader -->
+    	<script src="https://unpkg.com/http-vue-loader"></script>
+		
+		<meta name="renderer" content="webkit">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<link rel="stylesheet" href="../../../component/pear/css/pear.css" />
+		<!-- <link rel="stylesheet" href="../../../admin/css/other/console1.css" /> -->
+		<style>
+			.hidden{
+                display: none;
+            }
+			.list .list-item {
+				height: 31.8px;
+				line-height: 31.8px;
+				color: gray;
+				padding: 5px;
+				padding-left: 15px;
+				border-radius: 4px;
+				margin-top: 5.2px;
+			}
+
+			.list .list-item:hover {
+				background-color: whitesmoke;
+			}
+
+			.list .list-item .title {
+				font-size: 13px;
+				width: 100%;
+			}
+
+			.list .list-item .footer {
+				position: absolute;
+				right: 30px;
+				font-size: 12px;
+			}
+			.top-panel {
+				border-radius: 4px;
+				text-align: center;
+			}
+		</style>
+	</head>
+	<body class="pear-container">
+		<div>
+			<div class="layui-row layui-col-space10">
+				<div class="layui-col ">
+					<div class="layui-card ">
+						<div class="layui-card-header top-panel">分析结果</div>
+						<div class="layui-card-body">
+							<div class="layui-row layui-col-space10">
+								<div class="layui-col-xs8 layui-col-md4 top-panel-number" style="color: #28333E;" id="va">
+								</div>
+								<div class="layui-col-xs4 layui-col-md8 top-panel-tips">
+									<div class="layui-col-md10">
+										<div class="layui-form-item">
+                						<label class="layui-form-label"></label>
+                						<div class="layui-input-inline">
+                    						<input type="text" name="keyword" placeholder="请输入交易哈希" class="layui-input">
+                						</div>
+                						<button class="pear-btn pear-btn-primary pear-btn-sm" >
+                    						<i ></i>分析</button>
+                						<button type="reset" class="pear-btn pear-btn-md">
+                    						<i class="layui-icon layui-icon-refresh"></i>重置</button>
+            							</div>
+									</div>
+									<div class="layui-col-md4"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+			<div class="layui-row layui-col-space10">
+				<div class="layui-col-md9">
+					<div class="layui-card">
+                        <div class="layui-card-header">展开数量：
+							<div class="layui-input-inline">
+								<input type="text" name="keyword" placeholder="请输入展开数量" class="layui-input">
+							</div>
+					        <button id="zhankai-number" class="pear-btn pear-btn-primary pear-btn-sm">确定</button>
+                        </div>
+						<div class="layui-card-body">
+							<div class="layui-tab custom-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+								<!-- <div id="echarts-records" style="background-color:#ffffff;min-height:485px;padding: 10px"></div> -->
+								<div id="main" style=" margin: 0; background-color: #fff9f9;min-height:485px;padding: 10px"></div>
+								<!-- height: 100% -->
+							</div>
+						</div>
+					</div>
+
+				</div>
+				<div class="layui-col-md3">
+					<div class="layui-card">
+						<div class="layui-card-header">交 易 信 息</div>
+						<div class="layui-card-body" id="trans_info">
+							{{a()}}
+							<ul class="list">
+								<!-- <li class="list-item"><span class="title">交易</span><span class="footer">2021-09-06 11:28</span></li> -->
+								<li class="list-item"><span class="title">TXID</span><span style="width:180px;overflow-y:auto;" class="footer">{{txid}}</span></li>
+								<li class="list-item"><span class="title">输入金额</span><span class="footer">{{input_total}}</span></li>
+								<li class="list-item"><span class="title">输出金额</span><span class="footer">{{output_total}}</span></li>
+								<li class="list-item"><span class="title">手续费</span><span class="footer">{{fee}}</span></li>
+								<li class="list-item"><span class="title">交易时间</span><span class="footer">{{time}}</span></li>
+							</ul>
+						</div>
+					</div>
+                    <div class="layui-card">
+						<div class="layui-card-header">
+							<button class="pear-btn pear-btn-sm" id="input_btn" onclick="showDiv('div1');">输 入 地 址</button>
+							<button class="pear-btn pear-btn-sm" id="output_btn" onclick="showDiv('div2');">输 出 地 址</button>
+						</div>
+						<div id="div1" class="layui-card-body">
+							<!-- b{{}} -->
+                            <table id="user-table"></table>
+						</div>
+						<div id="div2" class="layui-card-body hidden">
+							<!-- c{{}} -->
+							<table id="user-table2" class="layui-hide"></table>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+		<!--</div>-->
+		<script src="../../../component/layui/layui.js"></script>
+		<script src="../../../component/pear/pear.js"></script>
+
+		<script src="../../../component/vue.js"></script>
+		<script src="../../../component/axios.min.js"></script>
+
+		<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+		<script type="text/javascript" src="../../../component/echarts.js"></script>
+
+		<script type="text/html" id="power-bar">
+    		<button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i></button>
+    		<button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove"><i class="layui-icon layui-icon-delete"></i></button>
+		</script>
+
+		<script>
+			// 输入输出地址信息切换
+            function showDiv(str) {
+                var divs = []; 
+                for(var i = 1;i < 3;i++) {
+                    divs[i] = document.getElementById("div" + i);
+                    divs[i].style.display = "none";
+                }
+                document.getElementById(str).style.display = "block";               
+            }
+        </script>
+
+<script type="text/javascript">
+
+var dom = document.getElementById("main");
+    var myChart = echarts.init(dom);
+    myChart.showLoading();
+    getData()
+    function getData() {
+         $.ajax({
+            url:"http://127.0.0.1:8000/transaction_search?hash_query=31999c6bd7024d7c2cf04fb0bc2fe536d07d8eb7a9828c5b52229209d3727cdb",
+            type:"GET",
+            dataType: "json",
+            success:function (res) {
+
+                var hash = res.data[0]['hash']
+                var input_address_list = res.data[0]['input']
+                var output_address_list = res.data[0]['output']
+                var data = []
+                var links = []
+                query_hash = {
+                    id: 'hash',
+                    name: hash,
+                    symbolSize: [$(window).width ()*0.011,$(window).width ()*0.011],
+                    itemStyle: { color: '#c60000',
+                    label: {
+                        normal: {
+                            show: true,
+							position: 'bottom',
+                        }
+                    },
+                    },
+                    isnode: true,
+                    x: 0,
+                    y: 0,
+                },
+                data.push(query_hash)
+                var input_address_length = 5
+                if(input_address_length>input_address_list.length){
+                    input_address_length = input_address_list.length
+                }
+                input_count = input_address_length/2*50
+                var output_address_length = 5
+                if(output_address_length>output_address_list.length){
+                    output_address_length = output_address_list.length
+                }
+                output_count = output_address_length/2*50
+                for(var i=0;i<=input_address_length-1;i++)
+                {
+                    if(input_address_list.length==1){input_count=0}
+                    console.log(input_address_list[i])
+                    input_address = {
+                        id: 'input'+i,
+                        name: input_address_list[i].address,
+                        symbolSize: [$(window).width ()*0.011,$(window).width ()*0.011],
+                        itemStyle: { color: '#fff' },
+                        label: {
+                            normal: {
+                                fontSize: $(window).width ()*0.01,
+                                show: true,
+                            }
+                        },
+                        isnode: true,
+                        x: -200,
+                        y: input_count/2-i*50,
+                    }
+                    pre_hash = {
+                        id: 'pre_hash'+i,
+                        name: input_address_list[i].pre_hash,
+                        symbolSize: [$(window).width ()*0.011,$(window).width ()*0.011],
+                        itemStyle: { color: '#4962FC' },
+                        label: {
+                            normal: {
+                                fontSize: $(window).width ()*0.01,
+                                show: true,
+                            }
+                        },
+                        isnode: true,
+                        x: -450,
+                        y: input_count/2-i*50,
+                    }
+                    //当前交易的输入金额
+                    link1 = {
+                        source: 'input'+i,
+                        target: 'hash',
+                        islink: true,
+                        name: input_address_list[i].value,
+                        lineStyle: {
+                            normal: {
+                                curveness: 0,
+                                type: 'dashed',
+                            }
+                        },
+                        label: {
+                            normal: {
+                                fontSize: $(window).width ()*0.007,
+                                formatter: function (params, ticket, callback) {
+                                    params.name = params.data.name;
+                                    return params.name;
+                                },
+                                show: true
+                            }
+                        }
+                    },
+					//前一笔交易输入地址的金额
+                    link2 = {
+                        source: 'pre_hash'+i,
+                        target: 'input'+i,
+                        islink: true,
+                        name: input_address_list[i].value,
+                        lineStyle: {
+                            normal: {
+                                curveness: 0,
+                                type: 'dashed',
+                            }
+                        },
+                        label: {
+                            normal: {
+                                fontSize: $(window).width ()*0.007,
+                                formatter: function (params, ticket, callback) {
+                                    params.name = params.data.name;
+                                    return params.name;
+                                },
+                                show: true
+                            }
+                        }
+                    },
+                    data.push(input_address)
+                    data.push(pre_hash)
+                    links.push(link1)
+                    links.push(link2)
+                }
+                for(var i=0;i<=output_address_length-1;i++)
+                {
+                    if(output_address_list.length==1){output_count=0}
+                    output_address = {
+                        id: 'output'+i,
+                        name: output_address_list[i].output_address,
+                        symbolSize: [$(window).width ()*0.011,$(window).width ()*0.011],
+                        itemStyle: { color: '#fff' },
+                        label: {
+                            normal: {
+                                fontSize: $(window).width ()*0.01,
+                                show: true,
+                            }
+                        },
+                        isnode: true,
+                        x: 200,
+                        y: output_count/2-i*50,
+                    }
+                    if (output_address_list[i].next_hash != "") {
+                        next_hash = {
+                            id: 'next_hash' + i,
+                            name: output_address_list[i].next_hash,
+                            symbolSize: [$(window).width() * 0.011, $(window).width() * 0.011],
+                            itemStyle: {color: '#4962FC'},
+                            label: {
+                                normal: {
+                                    fontSize: $(window).width() * 0.010,
+                                    show: true,
+                                }
+                            },
+                            isnode: true,
+                            x: 450,
+                            y: output_count / 2 - i * 50,
+                        }
+                        data.push(next_hash)
+                        link2 = {
+                        source: 'output'+i,
+                        target: 'next_hash'+i,
+                        islink: true,
+                        name: output_address_list[i].value,
+                        lineStyle: {
+                            normal: {
+                                curveness: 0,
+                                type: 'dashed',
+                            }
+                        },
+                        label: {
+                            normal: {
+                                fontSize: $(window).width()*0.007,
+                                formatter: function (params, ticket, callback) {
+                                    params.name = params.data.name;
+                                    return params.name;
+                                },
+                                show: true
+                            }
+                        }
+                    }
+                    links.push(link2)
+                    }
+                    link1 = {
+                        source: 'hash',
+                        target: 'output'+i,
+                        islink: true,
+                        name: output_address_list[i].value,
+                        lineStyle: {
+                            normal: {
+                                curveness: 0,
+                                type: 'dashed',
+                            }
+                        },
+                        label: {
+                            normal: {
+                                fontSize: $(window).width ()*0.007,
+                                formatter: function (params, ticket, callback) {
+                                    params.name = params.data.name;
+                                    return params.name;
+                                },
+                                show: true
+                            }
+                        }
+                    },
+
+                    data.push(output_address)
+                    links.push(link1)
+                }
+                option = {
+                        title: {
+                           text: '比特币交易分析',
+                        },
+                        tooltip: {},
+                        animationDurationUpdate: 1500,
+                        animationEasingUpdate: 'quinticInOut',
+                        series: [{
+                            type: 'graph',
+                            layout: 'none',
+                            itemStyle: {
+                                color: '#fff',
+                                borderColor: 'black',
+                                borderWidth: 0.5,
+                                overflow: 'truncate',
+                            },
+                            roam: true, //鼠标缩放及平移
+                            focusNodeAdjacency: true, //是否在鼠标移到节点上的时候突出显示节点以及节点的边和邻接节点
+                            label: {
+                                normal: {
+                                    formatter(v) {
+                                                    let text = v.name
+                                                        if (text.length > 30) {
+                                                            return text = `${text.slice(0,15)}` + '...'
+                                                        }
+                                                    },
+
+                                    show: true, //控制非高亮时节点名称是否显示
+                                    position: 'bottom',
+
+                                }
+                            },
+
+                            edgeSymbol: ['none', 'arrow'],
+                            edgeSymbolSize: [1, 10], //箭头的大小
+                            edgeLabel: {
+                                normal: {
+                                    show: false
+                                },
+                                emphasis: {
+                                    textStyle: {
+                                        fontSize: $(window).width ()*0.0061 //边节点显示的字体大小
+                                    }
+                                }
+                            },
+
+                        //节点信息
+
+                        data: data,
+                        links: links,
+                        lineStyle: {
+                            normal: {
+                                show: true,
+                                color: {
+                                    type: 'graph',
+                                    x: 1,
+                                    y: 1,
+                                    x2: 0,
+                                    y2: 1,
+                                    colorStops: [{
+                                        offset: 0,
+                                        color: 'red' // 0% 处的颜色
+                                    }, {
+                                        offset: 1,
+                                        color: 'blue' // 100% 处的颜色
+                                    }],
+                                    globalCoord: true // 缺省为 false
+                                },
+
+                                // curveness: 0.2
+
+                            },
+                            emphasis: {
+                                color: 'red',
+                                width: 3,
+                                type: 'dashed', //虚线
+
+                            }
+                        },
+
+                        tooltip: {
+                            position: 'bottom', //悬浮时显示的位置
+                            backgroundColor:'rgba(128, 128, 128, 0.5)' ,//rgba设置透明度0.1
+                            textStyle: {
+                                fontSize: $(window).width ()*0.005,
+                            },
+                        }, //悬浮时的提示框，不设置时是随鼠标移动
+
+                    }]
+                };
+
+                myChart.hideLoading();
+                if (option && typeof option === 'object') {
+                    myChart.setOption(option);
+                }
+
+
+            },
+            error:function () {
+                alert("接收失败")
+            }
+        })
+
+    };
+
+    
+</script>
+
+		<!-- <script>
+			layui.use('table', function(){
+        		var table = layui.table;
+				table.render({
+            		elem: '#user-table',
+					url:'http://127.0.0.1:8000/transaction_search_input',
+					cols: [[
+                		{field:'address', title:'地址'},
+                		{field:'value', title:'金额'}
+				]]
+				})
+			},
+		</script> -->
+
+		<script>
+			// 输入输出地址信息表部分
+			layui.use(['table', 'form', 'jquery', 'drawer', 'dropdown'], function() {
+				let table = layui.table;
+				let form = layui.form;
+				let $ = layui.jquery;
+				let drawer = layui.drawer;
+				let dropdown = layui.dropdown;
+				let MODULE_PATH = "/system/user/";
+				let cols = [
+					[
+
+						{
+							title: '账号',
+							field: 'username',
+							align: 'center',
+							width: 100
+						},
+						{
+							title: '姓名',
+							field: 'realName',
+							align: 'center'
+						},
+					]
+				]
+				table.render({
+					elem: '#user-table',
+					url: '../../../admin/data/table.json', // url: 'http://127.0.0.1:8000/transaction_search_input',
+					// method: "get",
+					page: true,
+					cols: cols,
+					skin: 'line',
+				});
+
+				form.on('submit(user-query)', function(data) {
+					table.reload('user-table', {
+						where: data.field
+					})
+					return false;
+				});
+
+				form.on('switch(user-enable)', function(obj) {
+					layer.tips(this.value + ' ' + this.name + '：' + obj.elem.checked, obj.othis);
+				});
+
+
+
+
+				table.render({
+					elem: '#user-table2',
+					url: 'http://127.0.0.1:8000/transaction_search_output',  //   ../../../admin/data/table.json
+					page: true,
+					cols: [[
+						{field: 'address', title: '地址', align: 'center'},
+						{field: 'value', title: '金额', align: 'center', sort: true}
+					]],
+					skin: 'line',
+
+				});
+
+				form.on('submit(user-query)', function(data) {
+					table.reload('user-table2', {
+						where: data.field
+					})
+					return false;
+				});
+
+			})
+		</script>
+		
+		<script>
+			// 右上角交易信息
+			var searchaxios = new Vue({
+				el: '#trans_info',
+				data: {
+					txid: "",         // 传过来的交易哈希
+					input_total: "",  // 总输入金额
+					output_total: "", // 总输出金额
+					fee: "",          // 手续费
+					time: "",         // 交易时间
+				},
+
+				methods: {
+					a() {
+						// var query = window.location.search.substring(1);
+						// var id = query.split("=")[1];
+						axios.get("http://127.0.0.1:8000/transaction_search2", {
+							// params: {
+							// 	id: id
+							// },
+						}).then((response) => {
+							console.log(response.data)
+							console.log(response.data.data[0].hash)
+							this.txid = response.data.data[0]['hash']
+							this.input_total = response.data.data[0]['input_total']
+							this.output_total = response.data.data[0]['output_total']
+							this.fee = response.data.data[0]['fee']
+							this.time = response.data.data[0]['time']
+							
+						})
+					},
+				}
+			})
+	   </script>       
+
+
+	<script>
+	// 中间折线图部分，没有用
+	layui.use(['layer', 'echarts', 'element', 'count'], function() {
+		var $ = layui.jquery,
+			layer = layui.layer,
+			element = layui.element,
+			count = layui.count,
+			echarts = layui.echarts;
+
+		count.up("value1", {
+			time: 4000,
+			num: 440.34,
+			bit: 2,
+			regulator: 50
+		})
+
+		count.up("value2", {
+			time: 4000,
+			num: 236.30,
+			bit: 2,
+			regulator: 50
+		})
+
+		count.up("value3", {
+			time: 4000,
+			num: 634.43,
+			bit: 2,
+			regulator: 50
+		})
+
+		count.up("value4", {
+			time: 4000,
+			bit: 2,
+			num: 373.23,
+			regulator: 50
+		})
+
+		var echartsRecords = echarts.init(document.getElementById('echarts-records'), 'walden');
+
+		const colorList = ["#9E87FF", '#73DDFF', '#fe9a8b', '#F56948', '#9E87FF']
+		var option = {
+			backgroundColor: '#fff',
+			tooltip: {
+				show: false
+			},
+			grid: {
+				top: '10%',
+				bottom: '6%',
+				left: '6%',
+				right: '6%',
+				containLabel: true
+			},
+			xAxis: [{
+				type: 'category',
+				boundaryGap: false,
+				axisLine: {
+					show: false
+				},
+				axisTick: {
+					show: false
+				},
+				axisLabel: {
+					margin: 10,
+					textStyle: {
+						fontSize: 14,
+						color: 'rgba(#999)',
+					}
+				},
+				splitLine: {
+					show: true,
+					lineStyle: {
+						color: '#939ab6',
+						opacity: .15
+					}
+				},
+				data: ['10:00', '10:10', '10:10', '10:30', '10:40', '10:50']
+			}, ],
+			yAxis: [{
+				type: 'value',
+				offset: 15,
+				max: 100,
+				min: 0,
+				axisTick: {
+					show: false
+				},
+				axisLine: {
+					show: false
+				},
+				axisLabel: {
+					margin: 10,
+					textStyle: {
+						fontSize: 14,
+						color: '#999',
+					}
+				},
+				splitLine: {
+					show: false
+				}
+
+			}],
+			series: [{
+				name: '2',
+				type: 'line',
+				z: 3,
+				showSymbol: false,
+				smoothMonotone: 'x',
+				lineStyle: {
+					width: 3,
+					color: {
+						type: 'linear',
+						x: 0,
+						y: 0,
+						x2: 0,
+						y2: 1,
+						colorStops: [{
+							offset: 0,
+							color: 'rgba(59,102,246)' // 0% 处的颜色
+						}, {
+							offset: 1,
+							color: 'rgba(118,237,252)' // 100% 处的颜色
+						}]
+					},
+					shadowBlur: 4,
+					shadowColor: 'rgba(69,126,247,.2)',
+					shadowOffsetY: 4
+				},
+				areaStyle: {
+					normal: {
+						color: {
+							type: 'linear',
+							x: 0,
+							y: 0,
+							x2: 0,
+							y2: 1,
+							colorStops: [{
+								offset: 0,
+								color: 'rgba(227,233,250,.9)' // 0% 处的颜色
+							}, {
+								offset: 1,
+								color: 'rgba(248,251,252,.3)' // 100% 处的颜色
+							}]
+						}
+					}
+				},
+				smooth: true,
+				data: [20, 56, 17, 40, 68, 42]
+			}, {
+				name: '1',
+				type: 'line',
+				showSymbol: false,
+				smoothMonotone: 'x',
+
+				lineStyle: {
+					width: 3,
+					color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+						offset: 0,
+						color: 'rgba(255,84,108)'
+					}, {
+						offset: 1,
+						color: 'rgba(252,140,118)'
+					}], false),
+					shadowBlur: 4,
+					shadowColor: 'rgba(253,121,128,.2)',
+					shadowOffsetY: 4
+				},
+				areaStyle: {
+					color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+						offset: 0,
+						color: 'rgba(255,84,108,.15)'
+					}, {
+						offset: 1,
+						color: 'rgba(252,140,118,0)'
+					}], false),
+				},
+				smooth: true,
+				data: [20, 71, 8, 50, 57, 32]
+			}, ]
+
+		};
+		echartsRecords.setOption(option);
+
+		window.onresize = function() {
+			echartsRecords.resize();
+		}
+
+	});
+	</script>
+
+	</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>地址查询</title>
+		<meta name="renderer" content="webkit">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<link rel="stylesheet" href="../../../component/pear/css/pear.css" />
+		<link rel="stylesheet" href="../../../admin/css/query.css">
+		<link href="https://cdnjs.loli.net/ajax/libs/font-awesome/5.8.0/css/all.min.css" rel="stylesheet">
+		<style type="text/css">
+			body{
+				background-image:url(../../../admin/images/blockchain.png)
+			}
+		</style>
+	</head>
+	<body class="pear-container">
+		<!-- <div class="con">
+			<div class="sou">
+				<div class="t1">
+					<span id="biaoti">地址查询</span>
+				</div>
+				<form method="get" target="_self">
+					<input class="wd" id="searchinfo" type="text" placeholder="请输入要查询的虚拟币地址" name="wd"
+						x-webkit-speech lang="zh-CN">
+					<button id="searchbtn" type="button"><i
+							class="fab fa-sistrix"></i></button>   
+				</form>
+				<div class="t1">
+					<span style="font-size:18px"></span>
+				</div>
+			</div>
+		</div>
+		<script src="../../../component/layui/layui.js"></script>
+		<script src="../../../component/pear/pear.js"></script>
+		<script>
+			layui.use(['jquery','layer'], function() {
+				var $ = layui.jquery;
+
+				$("#searchbtn").click(function(){
+					window.location = '../../../view/Case_Tools/Addr_Search/addr_info.html'
+				})
+			})
+		</script>
+		<script>
+			document.getElementById("biaoti").style.color="white";
+		</script> -->
+
+		<div class="con">
+			<div class="sou">
+				<div class="t1">
+					<span>地址查询</span>
+				</div>
+				<form method="GET">
+					<input class="wd" id="searchinfo" type="text" placeholder="输入地址" name="wd"
+						x-webkit-speech lang="zh-CN">
+					<button  id="search" type="button" name="1"><i
+							class="fab fa-sistrix"></i></button>
+				</form>
+			</div>
+		</div>
+		<script>
+		</script>
+		<script type="text/javascript">
+			$("#search").click(function () {
+				var message = $("#searchinfo").val()
+				$.ajax({
+					url:"http://127.0.0.1:8000/search",
+					type:"GET",
+					dataType: "json",
+					data:{
+						hash_query:message
+					},
+					success:function (res) {
+
+
+						var hash = res.data[0]['hash']
+						var input_address_list = res.data[0]['input']
+						var output_address_list = res.data[0]['output']
+						var data = []
+						var links = []
+						query_hash = {
+							id: 'hash',
+							name: hash,
+							symbolSize: [130,21],
+							itemStyle: { color: '#4962FC',
+							label: {
+								normal: {
+									show: true,
+								}
+							},
+							},
+							isnode: true,
+							x: 0,
+							y: 0,
+						},
+						data.push(query_hash)
+						var input_address_length = 5
+						if(input_address_length>input_address_list.length){
+							input_address_length = input_address_list.length
+						}
+						input_count = input_address_length*50/2
+						var output_address_length = 5
+						if(output_address_length>output_address_list.length){
+							output_address_length = output_address_list.length
+						}
+						output_count= output_address_length*50/2
+						for(var i=0;i<=input_address_length-1;i++)
+						{
+							input_address = {
+								id: 'input'+i,
+								name: input_address_list[i]['address'],
+								symbolSize: [130,21],
+								itemStyle: { color: '#fff' },
+								label: {
+									normal: {
+										fontSize: 10,
+										show: true,
+									}
+								},
+								isnode: true,
+								x: -50,
+								y: input_count-i*50,
+							}
+							link = {
+								source: hash,
+								target: 'input'+i,
+								islink: true,
+								name: input_address_list[i]['value'],
+								lineStyle: {
+									normal: {
+										curveness: 0,
+										type: 'dashed',
+									}
+								},
+								label: {
+									normal: {
+										fontSize: 10,
+										formatter: function (params, ticket, callback) {
+											params.name = params.data.name;
+											return params.name;
+										},
+										show: true
+									}
+								}
+							},
+							data.push(input_address)
+							links.push(link)
+						}
+						for(var i=0;i<=output_address_length-1;i++)
+						{
+							output_address = {
+								id: 'output'+i,
+								name: output_address_list[i]['address'],
+								symbolSize: [130,21],
+								itemStyle: { color: '#fff' },
+								label: {
+									normal: {
+										fontSize: 10,
+										show: true,
+									}
+								},
+								isnode: true,
+								x: 50,
+								y: output_count-i*50,
+							}
+							link = {
+								source: hash,
+								target: 'output'+i,
+								islink: true,
+								name: output_address_list[i]['value'],
+								lineStyle: {
+									normal: {
+										curveness: 0,
+										type: 'dashed',
+									}
+								},
+								label: {
+									normal: {
+										fontSize: 10,
+										formatter: function (params, ticket, callback) {
+											params.name = params.data.name;
+											return params.name;
+										},
+										show: true
+									}
+								}
+							},
+							data.push(output_address)
+							links.push(link)
+						}
+
+					},
+					error:function () {
+						alert("接收失败")
+					}
+				})
+			})
+		</script>
+	</body>
+</html>

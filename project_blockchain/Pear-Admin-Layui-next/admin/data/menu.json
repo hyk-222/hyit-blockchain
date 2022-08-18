@@ -1,0 +1,133 @@
+[
+	{
+		"id": "Case_Tools",
+		"title": "办案工具",
+		"icon": "layui-icon layui-icon-util",
+		"type": 0,
+		"href": "",
+		"children":[{
+			"id": 1001,
+			"title": "地址查询",
+			"icon":"layui-icon layui-icon-util",
+			"type": 1,
+			"openType":"_iframe",
+			"href": "view/Case_Tools/Addr_Search/index.html"
+		},
+		{
+			"id": 1002,
+			"title": "交易流水",
+			"icon":"layui-icon layui-icon-util",
+			"type": 1,
+			"openType":"_iframe",
+			"href": "view/Case_Tools/Trans_Flow/index.html"
+		},
+		{
+			"id": 1003,
+			"title": "地址监控",
+			"icon":"layui-icon layui-icon-util",
+			"type": 1,
+			"openType":"_iframe",
+			"href": "view/Case_Tools/Addr_Monitor/index.html"
+		},
+		{
+			"id": 1004,
+			"title": "地址标注",
+			"icon":"layui-icon layui-icon-util",
+			"type": 1,
+			"openType":"_iframe",
+			"href": "view/Case_Tools/Addr_Tag/index.html"
+		},
+		{
+			"id": 1005,
+			"title": "调证协助",
+			"icon":"layui-icon layui-icon-util",
+			"type": 1,
+			"openType":"_iframe",
+			"href": "view/Case_Tools/Evidence/index.html"
+		}]
+	},
+	{
+		"id": "Visual_Analysis",
+		"title": "可视化分析",
+		"icon": "layui-icon layui-icon-util",
+		"type": 0,
+		"href": "",
+		"children":[{
+			"id": 1101,
+			"title": "地址研判",
+			"icon":"layui-icon layui-icon-util",
+			"type": 1,
+			"openType":"_iframe",
+			"href": "view/Visual_Analysis/Addr_Judge/index.html"
+		},
+		{
+			"id": 1102,
+			"title": "比特币交易分析",
+			"icon":"layui-icon layui-icon-util",
+			"type": 1,
+			"openType":"_iframe",
+			"href": "view/Visual_Analysis/BTC_Trans_Analysis/index.html"
+		}]
+	},
+	{
+		"id": "Doc_Base",
+		"title": "资料库",
+		"icon": "layui-icon layui-icon-util",
+		"type": 0,
+		"href": "",
+		"children":[{
+			"id": 1201,
+			"title": "判例库",
+			"icon":"layui-icon layui-icon-util",
+			"type": 1,
+			"openType":"_iframe",
+			"href": "view/Doc_Base/Case_Base/index.html"
+		},
+		{
+			"id": 1202,
+			"title": "起诉书",
+			"icon":"layui-icon layui-icon-util",
+			"type": 1,
+			"openType":"_iframe",
+			"href": "view/Doc_Base/Indictment/index.html"
+		},
+		{
+			"id": 1203,
+			"title": "术语解释",
+			"icon":"layui-icon layui-icon-util",
+			"type": 1,
+			"openType":"_iframe",
+			"href": "view/Doc_Base/Terminology/index.html"
+		}]
+	},
+	{
+		"id": "VPN_DC",
+		"title": "虚拟币使用记录",
+		"icon": "layui-icon layui-icon-util",
+		"type": 0,
+		"href": "",
+		"children":[{
+			"id": 1301,
+			"title": "淮安",
+			"icon":"layui-icon layui-icon-util",
+			"type": 1,
+			"openType":"_iframe",
+			"href": "view/VPN_DC/index.html"
+		},
+		{
+			"id": 13102,
+			"title": "全国",
+			"icon":"layui-icon layui-icon-util",
+			"type": 1,
+			"openType":"_iframe",
+			"href": "view/VPN_DC/allindex.html"
+		}]
+	},
+	{
+		"id": "Data_Screen",
+		"title": "数据大屏幕",
+		"icon": "layui-icon layui-icon-util",
+		"type": 1,
+		"href": "view/data-web/index.html"
+	}
+]

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+<head>
+    <meta charset="utf-8">
+    <title>xw1</title>
+</head>
+<body style="height: 100%; margin: 0; background-color: #fff9f9">
+<div id="main" style="height: 100%"></div>
+
+<script type="text/javascript" src="component/js/echarts.js"></script>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script type="text/javascript">
+
+    var dom = document.getElementById("main");
+    var myChart = echarts.init(dom);
+    myChart.showLoading();
+    getData()
+    function getData() {
+         $.ajax({
+            url:"http://127.0.0.1:8000/search?hash_query=ba73b230bf2ef91e2b797cb13a8eab15cb05d63b03bb8fefceb7395dcd7d8896",
+            type:"GET",
+            dataType: "json",
+            success:function (res) {
+
+                var hash = res.data[0]['hash']
+                var input_address_list = res.data[0]['input']
+                var output_address_list = res.data[0]['output']
+                var data = []
+                var links = []
+                query_hash = {
+                    id: 'hash',
+                    name: hash,
+                    symbolSize: [$(window).width ()*0.011,$(window).width ()*0.011],
+                    itemStyle: { color: '#c60000',
+                    label: {
+                        normal: {
+                            show: true,
+							position: 'bottom',
+                        }
+                    },
+                    },
+                    isnode: true,
+                    x: 0,
+                    y: 0,
+                },
+                data.push(query_hash)
+                var input_address_length = 5
+                if(input_address_length>input_address_list.length){
+                    input_address_length = input_address_list.length
+                }
+                input_count = input_address_length/2*50
+                var output_address_length = 5
+                if(output_address_length>output_address_list.length){
+                    output_address_length = output_address_list.length
+                }
+                output_count = output_address_length/2*50
+                for(var i=0;i<=input_address_length-1;i++)
+                {
+                    if(input_address_list.length==1){input_count=0}
+                    console.log(input_address_list[i])
+                    input_address = {
+                        id: 'input'+i,
+                        name: input_address_list[i].address,
+                        symbolSize: [$(window).width ()*0.011,$(window).width ()*0.011],
+                        itemStyle: { color: '#fff' },
+                        label: {
+                            normal: {
+                                fontSize: $(window).width ()*0.01,
+                                show: true,
+                            }
+                        },
+                        isnode: true,
+                        x: -200,
+                        y: input_count/2-i*50,
+                    }
+                    pre_hash = {
+                        id: 'pre_hash'+i,
+                        name: input_address_list[i].pre_hash,
+                        symbolSize: [$(window).width ()*0.011,$(window).width ()*0.011],
+                        itemStyle: { color: '#4962FC' },
+                        label: {
+                            normal: {
+                                fontSize: $(window).width ()*0.01,
+                                show: true,
+                            }
+                        },
+                        isnode: true,
+                        x: -450,
+                        y: input_count/2-i*50,
+                    }
+                    link1 = {
+                        source: 'input'+i,
+                        target: 'hash',
+                        islink: true,
+                        name: input_address_list[i].value,
+                        lineStyle: {
+                            normal: {
+                                curveness: 0,
+                                type: 'dashed',
+                            }
+                        },
+                        label: {
+                            normal: {
+                                fontSize: $(window).width ()*0.01,
+                                formatter: function (params, ticket, callback) {
+                                    params.name = params.data.name;
+                                    return params.name;
+                                },
+                                show: true
+                            }
+                        }
+                    },
+                    link2 = {
+                        source: 'pre_hash'+i,
+                        target: 'input'+i,
+                        islink: true,
+                        name: input_address_list[i].value,
+                        lineStyle: {
+                            normal: {
+                                curveness: 0,
+                                type: 'dashed',
+                            }
+                        },
+                        label: {
+                            normal: {
+                                fontSize: $(window).width ()*0.01,
+                                formatter: function (params, ticket, callback) {
+                                    params.name = params.data.name;
+                                    return params.name;
+                                },
+                                show: true
+                            }
+                        }
+                    },
+                    data.push(input_address)
+                    data.push(pre_hash)
+                    links.push(link1)
+                    links.push(link2)
+                }
+                for(var i=0;i<=output_address_length-1;i++)
+                {
+                    if(output_address_list.length==1){output_count=0}
+                    output_address = {
+                        id: 'output'+i,
+                        name: output_address_list[i].address,
+                        symbolSize: [$(window).width ()*0.011,$(window).width ()*0.011],
+                        itemStyle: { color: '#fff' },
+                        label: {
+                            normal: {
+                                fontSize: $(window).width ()*0.01,
+                                show: true,
+                            }
+                        },
+                        isnode: true,
+                        x: 200,
+                        y: output_count/2-i*50,
+                    }
+                    next_hash = {
+                        id: 'next_hash'+i,
+                        name: output_address_list[i].next_hash,
+                        symbolSize: [$(window).width ()*0.011,$(window).width ()*0.011],
+                        itemStyle: { color: '#4962FC' },
+                        label: {
+                            normal: {
+                                fontSize: $(window).width()*0.010,
+                                show: true,
+                            }
+                        },
+                        isnode: true,
+                        x: 450,
+                        y: output_count/2-i*50,
+                    }
+                    link1 = {
+                        source: 'hash',
+                        target: 'output'+i,
+                        islink: true,
+                        name: output_address_list[i].value,
+                        lineStyle: {
+                            normal: {
+                                curveness: 0,
+                                type: 'dashed',
+                            }
+                        },
+                        label: {
+                            normal: {
+                                fontSize: $(window).width ()*0.01,
+                                formatter: function (params, ticket, callback) {
+                                    params.name = params.data.name;
+                                    return params.name;
+                                },
+                                show: true
+                            }
+                        }
+                    },
+                    link2 = {
+                        source: 'output'+i,
+                        target: 'next_hash'+i,
+                        islink: true,
+                        name: output_address_list[i].value,
+                        lineStyle: {
+                            normal: {
+                                curveness: 0,
+                                type: 'dashed',
+                            }
+                        },
+                        label: {
+                            normal: {
+                                fontSize: $(window).width()*0.01,
+                                formatter: function (params, ticket, callback) {
+                                    params.name = params.data.name;
+                                    return params.name;
+                                },
+                                show: true
+                            }
+                        }
+                    },
+                    data.push(output_address)
+                    data.push(next_hash)
+                    links.push(link1)
+                    links.push(link2)
+                }
+                option = {
+                        title: {
+                           text: '比特币交易分析',
+                        },
+                        tooltip: {},
+                        animationDurationUpdate: 1500,
+                        animationEasingUpdate: 'quinticInOut',
+                        series: [{
+                            type: 'graph',
+                            layout: 'none',
+                            itemStyle: {
+                                color: '#fff',
+                                borderColor: 'black',
+                                borderWidth: 0.5,
+                                overflow: 'truncate',
+                            },
+                            roam: true, //鼠标缩放及平移
+                            focusNodeAdjacency: true, //是否在鼠标移到节点上的时候突出显示节点以及节点的边和邻接节点
+                            label: {
+                                normal: {
+                                    formatter(v) {
+                                                    let text = v.name
+                                                        if (text.length > 30) {
+                                                            return text = `${text.slice(0,15)}` + '...'
+                                                        }
+                                                    },
+
+                                    show: true, //控制非高亮时节点名称是否显示
+                                    position: 'bottom',
+
+                                }
+                            },
+
+                            edgeSymbol: ['none', 'arrow'],
+                            edgeSymbolSize: [1, 10], //箭头的大小
+                            edgeLabel: {
+                                normal: {
+                                    show: false
+                                },
+                                emphasis: {
+                                    textStyle: {
+                                        fontSize: $(window).width ()*0.0061 //边节点显示的字体大小
+                                    }
+                                }
+                            },
+
+                        //节点信息
+
+                        data: data,
+                        links: links,
+                        lineStyle: {
+                            normal: {
+                                show: true,
+                                color: {
+                                    type: 'graph',
+                                    x: 1,
+                                    y: 1,
+                                    x2: 0,
+                                    y2: 1,
+                                    colorStops: [{
+                                        offset: 0,
+                                        color: 'red' // 0% 处的颜色
+                                    }, {
+                                        offset: 1,
+                                        color: 'blue' // 100% 处的颜色
+                                    }],
+                                    globalCoord: false // 缺省为 false
+                                },
+
+                                // curveness: 0.2
+
+                            },
+                            emphasis: {
+                                color: 'red',
+                                width: 3,
+                                type: 'dashed', //虚线
+
+                            }
+                        },
+
+                        tooltip: {
+                            position: 'bottom', //悬浮时显示的位置
+                            backgroundColor:'rgba(128, 128, 128, 0.5)' ,//rgba设置透明度0.1
+                            textStyle: {
+                                fontSize: $(window).width ()*0.01,
+                            },
+                        }, //悬浮时的提示框，不设置时是随鼠标移动
+
+                    }]
+                };
+
+                myChart.hideLoading();
+                if (option && typeof option === 'object') {
+                    myChart.setOption(option);
+                }
+
+
+            },
+            error:function () {
+                alert("接收失败")
+            }
+        })
+
+    };
+
+</script>
+</body>
+</html>

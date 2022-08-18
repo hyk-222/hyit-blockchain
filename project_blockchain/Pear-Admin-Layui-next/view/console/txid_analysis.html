@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+		<title>交易分析</title>
+		<meta name="renderer" content="webkit">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<link rel="stylesheet" href="../../component/pear/css/pear.css" />
+		<link rel="stylesheet" href="../../admin/css/other/console2.css" />
+        <script src="https://gw.alipayobjects.com/os/lib/antv/g6/4.3.11/dist/g6.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <script src="../../component/layui/layui.js"></script>
+        <script src="../../component/pear/pear.js"></script>
+    </head>
+    <body>
+    <div class="pear-container">
+        <div>
+            <div id="container" class="layui-col-md7">
+                <div id="box">
+                        <span>{{target}}</span><br>
+                        <span>{{value}}</span>
+                </div>
+                <div class="layer-close-mask">
+                    <button id="btnClose" class="pear-btn pear-btn-primary" style="position: absolute; bottom: 10px;left: 10px;">关闭抽屉</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </body>
+
+    <script> 
+        var vm = new Vue({
+        el: '#container',
+        data() {
+            return {
+            dataList: {},
+            dataList2: {},
+            id: "",
+            count: 1,
+            direction: 0,
+            target: '',
+            value: '',
+            }
+        },
+        components:{
+        },
+        created (){
+            // this.tradeMap();
+            this.isLoading = false
+        },
+        mounted () {
+            this.getData();
+            this.getRoot();
+            // this.render();
+        },
+        methods: {
+            // 从api获取初始数据
+            async getRoot() {
+            let data;
+            let data2;
+            const root = {};
+            // 接收参数
+            var tx = document.location.href.split('=');
+            const search_txid = tx[1]
+            // let search_txid="6876e98556b7312d727b4fae72e3b6bc827e762c2e8977928245e319de8acf26";
+            let url1 = 'https://chain.so/api/v2/tx/BTC/' + search_txid;
+            await axios.get(url1).then(res => {
+                data = res.data.data;
+                })
+            root.id = '1';
+            root.nood = 0;
+            root.direction = 0;
+            root.children = [];
+            for(let i=0;i<2;i++){
+                if(data.inputs[i]){
+                let child = {};
+                child.id = 'i-'+i;
+                child.nood = 2;
+                child.direction = 1;
+                if(data.inputs[i].received_from !== null){
+                    child.isSpread = true;
+                    child.received_txid = data.inputs[i].received_from.txid;
+                }else{
+                    child.isSpread = false;
+                    };          
+                child.text1 = 'BTC',
+                child.text3 = data.inputs[i].value + "BTC",
+                child.text2 = data.inputs[i].address,
+                child.url = "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg",
+                root.children.push(child);
+                }
+                if(data.outputs[i]){
+                let child = {}
+                child.id = 'o-'+i;
+                child.nood = 2;
+                child.direction = 2;
+                if(data.outputs[i].spent !== null){
+                    child.isSpread = true;
+                    child.spend_txid = data.outputs[i].spent.txid;
+                }else{child.isSpread = false;}
+                child.text1 = 'BTC'
+                child.text3 = data.outputs[i].value + "BTC",
+                child.text2 = data.outputs[i].address
+                child.url = "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg",
+                root.children.push(child)
+                }
+            }
+            this.dataList = root;
+            this.render();
+            },
+            // 动态加载的数据
+            async getData(){
+            let data;
+            let data2;
+            const root = {};
+            let spent_txid = this.spent_txid
+            let received_txid = this.received_txid
+            let num = this.count;
+            if(spent_txid!==undefined && received_txid == undefined){
+                let url1 = 'https://chain.so/api/v2/tx/BTC/' + spent_txid
+                await axios.get(url1).then(res => {
+                    data2 = res.data.data;
+                    });
+                const child = []
+                if(data2.outputs.length >= 2){
+                for(let i=0;i<2;i++){
+                    const outputs = {}
+                    outputs.id = num + '-' + i;
+                    outputs.nood = 2;
+                    outputs.direction = 2;
+                    outputs.text1 = 'BTC';
+                    outputs.text2 = data2.outputs[i].address;
+                    outputs.text3 = data2.outputs[i].value + 'BTC';
+                    outputs.url = "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg";
+                    if(data2.outputs[i].spent !== null){
+                    outputs.isSpread = true;
+                    outputs.spend_txid = data2.outputs[i].spent.txid;
+                    }else{outputs.isSpread = false;}
+                    child.push(outputs)
+                }
+                }else{
+                    for(let i=0;i<data2.outputs.length-1;i++){
+                    const outputs = {}
+                    outputs.id = num + '-' + i;
+                    outputs.nood = 2;
+                    outputs.direction = 2;
+                    outputs.text1 = 'BTC';
+                    outputs.text2 = data2.outputs[i].address;
+                    outputs.text3 = data2.outputs[i].value + 'BTC';
+                    outputs.url = "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg";
+                    if(data2.outputs[i].spent !== null){
+                    outputs.isSpread = true;
+                    outputs.spend_txid = data2.outputs[i].spent.txid;
+                    }else{outputs.isSpread = false;}
+                    child.push(outputs)
+                }
+                }
+                this.dataList2 = {
+                                id: 'hash-'+ this.count,
+                                nood: 2,
+                                direction: 2,
+                                isSpread: false,
+                                children:child,
+                                text1: 'BTC-HASH',
+                                text2: spent_txid,
+                                text3: 'BTC',
+                                url: "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg",};
+            };
+                this.loading = true;
+            if(received_txid!==undefined && spent_txid == undefined){
+                let url1 = 'https://chain.so/api/v2/tx/BTC/' + received_txid
+                await axios.get(url1).then(res => {
+                    data2 = res.data.data;
+                    });
+                const child = []
+                if(data2.inputs.length >= 2){
+                for(let i=0;i<2;i++){
+                    const inputs = {}
+                    inputs.id = 'i' + num + '-' + i;
+                    inputs.nood = 2;
+                    inputs.direction = 1;
+                    inputs.text1 = 'BTC';
+                    inputs.url = "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg";
+                    inputs.text2 = data2.inputs[i].address;
+                    inputs.text3 = data2.inputs[i].value + 'BTC';
+                    if(data2.inputs[i].received_from !== null){
+                    inputs.isSpread = true;
+                    inputs.received_txid = data2.inputs[i].received_from.txid;
+                    }else{outputs.isSpread = false;}
+                    child.push(inputs)
+                }
+                }else{
+                for(let i=0;i<data2.inputs.length-1;i++){
+                    const inputs = {}
+                    inputs.id = 'i' + num + '-' + i;
+                    inputs.nood = 2;
+                    inputs.direction = 1;
+                    inputs.text1 = 'BTC';
+                    inputs.url = "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg";
+                    inputs.text2 = data2.inputs[i].address;
+                    inputs.text3 = data2.inputs[i].value + 'BTC';
+                    if(data2.inputs[i].received_from !== null){
+                    inputs.isSpread = true;
+                    inputs.received_txid = data2.inputs[i].received_from.txid;
+                    }else{outputs.isSpread = false;}
+                    child.push(inputs)
+                }
+                }
+                this.dataList2 = {
+                                id: 'hash-'+ this.count,
+                                nood: 2,
+                                direction: 1,
+                                isSpread: false,
+                                children:child,
+                                text1: 'BTC-HASH',
+                                text2: received_txid,
+                                text3: 'BTC',
+                                url: "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg",};
+                this.render();
+            }
+                this.loading = true;
+            },
+            async render () {
+            // g6 的实例方法里 this 会变
+            let _this = this;
+            // 文本超出隐藏
+            // fittingString(字段, 最大长度, 字体大小)
+            const fittingString = (str, maxWidth, fontSize) => {
+                const ellipsis = '...';
+                const ellipsisLength = G6.Util.getTextSize(ellipsis, fontSize)[0];
+                let currentWidth = 0;
+                let res = str;
+                const pattern = new RegExp('[\u4E00-\u9FA5]+'); // distinguish the Chinese charactors and letters
+                str.split('').forEach((letter, i) => {
+                if (currentWidth > maxWidth - ellipsisLength) return;
+                if (pattern.test(letter)) {
+                    // Chinese charactors
+                    currentWidth += fontSize;
+                } else {
+                    // get the width of single letter according to the fontSize
+                    currentWidth += G6.Util.getLetterWidth(letter, fontSize);
+                }
+                if (currentWidth > maxWidth - ellipsisLength) {
+                    res = `${str.substr(0, i)}${ellipsis}`;
+                }
+                });
+                return res;
+            };
+            // 自定义节点
+            G6.registerNode(
+                'tree-node',
+                {
+                drawShape: function drawShape(cfg, group) {
+                    const rect = group.addShape('rect', {
+                    attrs: {
+                        x: 0, // x 轴移动距离
+                        y: 0, // y 轴移动距离
+                        width: cfg.nood == 1 ? 170 : 190,// 宽
+                        height: 65,// 高
+                        // fill: '#666', // 背景色
+                        // stroke: '#666',// 边框色
+                    },
+                    name: 'big-rect-shape',
+                    });
+                    // 主节点
+                    if (cfg.nood  == 0){
+                    group.addShape('rect', {
+                        attrs: {
+                        x: 0,
+                        y: 0,
+                        },
+                        name: 'source-shape',
+                    });
+                    group.addShape('rect', {
+                        attrs: {
+                        fill: '#d8e5ff',
+                        x: 60,
+                        y: 0,
+                        width: 64,
+                        height: 64,
+                        radius: 35,
+                        },
+                        name: 'source-rect-shape',
+                    });
+                    group.addShape('rect', {
+                        attrs: {
+                        fill: '#2d60e0',
+                        x: 78,
+                        y: 18,
+                        width: 28,
+                        height: 28,
+                        radius: 14,
+                        },
+                        name: 'source-rect-shape',
+                    });
+                    group.addShape('text', {
+                        attrs: {
+                        fill: '#fff',
+                        text: '',
+                        x: 63,
+                        y: 90,
+                        },
+                        name: 'source-text-shape',
+                    });
+                    }
+                    // 统计节点
+                    if (cfg.nood == 1){
+                    let operate = '';
+                    if(cfg.value3 > cfg.value2){
+                        operate= ''
+                    }else{
+                        operate= ''
+                    }
+                    /* 盒子 */
+                    group.addShape('rect', {
+                        attrs: {
+                        fill: '#eff4ff',
+                        x: 5,
+                        y: 18,
+                        width: 170,
+                        height: 30,
+                        radius: 15,
+                        },
+                        name: 'stat-rect-shape',
+                    });
+                    /* 文字 */
+                    group.addShape('text', {
+                        attrs: {
+                        fill: '#000',
+                        text: operate + cfg.value,
+                        x: 30,
+                        y: 40,
+                        },
+                        name: 'stat-text-shape',
+                    });
+                    }
+                    // 普通节点
+                    if (cfg.nood == 2){
+                    /* 盒子 */
+                    group.addShape('rect', {
+                        attrs: {
+                        fill: '#fff',
+                        shadowColor: '#c1c1c0',//阴影颜色
+                            shadowBlur: 40,//阴影范围
+                        x: cfg.direction == '2' ? 5 : 15,
+                        y: 0,
+                        width: 170,
+                        height: 65,
+                        radius: 5,
+                        },
+                        name: 'rect-shape',
+                    });
+                    /* 第一个图标 */
+                    group.addShape('image', {
+                        attrs: {
+                        x: cfg.direction == '2' ? 13 : 23,
+                        y: 8,
+                        height: 14,
+                        width: 14,
+                        img: 'https://gw.alipayobjects.com/zos/basement_prod/300a2523-67e0-4cbf-9d4a-67c077b40395.svg',
+                        },
+                        name: 'state-icon',
+                    });
+                    /* 第二个图标 */
+                    group.addShape('image', {
+                        attrs: {
+                        x: cfg.direction == '2' ? 13 : 23,
+                        y: 30,
+                        height: 14,
+                        width: 14,
+                        img: cfg.url,
+                        },
+                        name: 'copy-icon',
+                    });
+                    /* 第一行字 */
+                    group.addShape('text', {
+                        attrs: {
+                        text: cfg.text1,
+                        x: cfg.direction == '2' ? 35 : 45,
+                        y: 15,
+                        fontSize: 10,
+                        textAlign: 'left',
+                        textBaseline: 'middle',
+                        fill: '#666',
+                        },
+                        name: 'text-shape',
+                    });
+                    /* 第二行字 */
+                    group.addShape('text', {
+                        attrs: {
+                        // fittingString(字段, 最大长度, 字体大小)
+                        text: fittingString(cfg.text2, 130, 12),
+                        x: cfg.direction == '2' ? 35 : 45,
+                        y: 35,
+                        fontSize: 12,
+                        textAlign: 'left',
+                        textBaseline: 'middle',
+                        fill: '#666',
+                        },
+                        name: 'center-text-shape',
+                    });
+                    /* 第三行字 */
+                    group.addShape('text', {
+                        attrs: {
+                        text: fittingString(cfg.text3, 150, 12),
+                        x: cfg.direction == '2' ? 35 : 45,
+                        y: 52,
+                        fontSize: 10,
+                        textAlign: 'left',
+                        textBaseline: 'middle',
+                        fill: '#9aa1b1',
+                        },
+                        name: 'bottom-text-shape',
+                    });
+                    /* 折叠展开 */
+                    if (cfg.isSpread) {
+                        group.addShape('marker', {
+                        attrs: {
+                            x: cfg.direction == '2' ? 182 : 8,
+                            y: 32,
+                            r: 6,
+                            symbol: cfg.collapsed || cfg.isSpread ? G6.Marker.expand : G6.Marker.collapse,
+                            stroke: '#666',
+                            fill: '#fff',
+                            lineWidth: 1,
+                            cursor: 'pointer', // 鼠标变手
+                            
+                        },
+                        name: 'collapse-icon',
+                        });
+                    }
+                    }
+                    return rect;
+                },
+                // 更新
+                update: (cfg, item) => {
+                    if(cfg.txhash){
+                    // 简单实现节流
+                    // 防止用户瞎点出现bug
+                    let previous = 0;
+                    let now = Date.now();
+                    if(now - previous > 1000){
+                        previous = now;
+                        const group = item.getContainer();
+                        const icon = group.find((e) => e.get('name') === 'collapse-icon');
+                        icon.attr('symbol', cfg.collapsed ? G6.Marker.expand : G6.Marker.collapse);
+                    }
+                    }
+                },
+                },
+                'single-node',
+            );
+            
+            const container = document.getElementById('container');// 获取容器id
+            const width = container.scrollWidth || 1520; // 宽
+            const height = container.scrollHeight || 816; // 高
+            const graph = new G6.TreeGraph({
+                // 图的  DOM 容器，可以传入该 DOM 的 id 或者直接传入容器的 HTML 节点对象。
+                container: 'container',
+                // 指定画布宽度，单位为 'px'
+                width,
+                // 指定画布高度，单位为 'px'
+                height,
+                // 设置画布的模式
+                modes: {
+                default: [
+                    {
+                    // 只适用于树图，展开或收起子树
+                    type: 'collapse-expand',
+                    // onChange：收起或展开的回调函数。警告：V3.1.2 版本中将移除
+                    onChange: function onChange(item, collapsed) {
+                        const data = item.get('model');
+                        graph.updateItem(item, {
+                        collapsed,
+                        });
+                        data.collapsed = collapsed;
+                        return true;
+                    },
+                    },
+                    // 拖拽画布；
+                    'drag-canvas',
+                    // 缩放画布；
+                    'zoom-canvas',
+                ],
+                },
+                // 默认状态下节点的配置，比如 type, size, color,会被写入的 data 覆盖
+                defaultNode: {
+                // 节点类型,这里是自定义节点,自己取名
+                type: 'tree-node',
+                // 指定边连入节点的连接点的位置（相对于该节点而言），可以为空
+                anchorPoints: [
+                    [0, 0.5],
+                    [1, 0.5],
+                ],
+                },
+                // 默认状态下边的配置
+                defaultEdge: {
+                // 指定边的类型，可以是内置边的类型名称，也可以是自定义边的名称。默认为 'line'
+                type: 'cubic-horizontal',
+                // 边的样式属性
+                style: {
+                    // 边的颜色
+                    stroke: '#A3B1BF',
+                    // 开始箭头
+                    startArrow: {
+                    path: G6.Arrow.circle(2, 2), // 内置样式
+                    fill: '#A3B1BF', // 颜色
+                    d: 4, // 偏移距离
+                    },
+                    // 结束箭头
+                    endArrow: {
+                    path: 'M 0,0 L 5,4 L 5,-4 Z', // 自定义样式
+                    fill: '#A3B1BF',
+                    d: 3,
+                    },
+                },
+                },
+                // 布局配置项，使用 type 字段指定使用的布局方式
+                layout: {
+                // 布局名称
+                type: 'compactBox',
+                // layout 的方向 H / V / LR / RL / TB / BT
+                // TB —— 根节点在上，往下布局
+                // BT —— 根节点在下，往上布局
+                // LR —— 根节点在左，往右布局
+                // RL —— 根节点在右，往左布局
+                // H —— 根节点在中间，水平对称布局
+                // V —— 根节点在中间，垂直对称布局
+                direction: 'H',
+                // 判断节点向左还是向右
+                getSide: (d) => { 
+                    if (d.data.direction == '2') {
+                    return 'right';
+                    }
+                    return 'left';
+                },
+                // 节点 id 的回调函数
+                getId: function getId(d) {
+                    return d.id;
+                },
+                // 节点高度的回调函数
+                getHeight: function getHeight() {
+                    return 40;
+                },
+                // 节点宽度的回调函数
+                getWidth: function getWidth() {
+                    return 20;
+                },
+                // 节点纵向间距的回调函数
+                getVGap: function getVGap() {
+                    return 18;
+                },
+                // 节点横向间距的回调函数
+                getHGap: function getHGap() {
+                    return 100;
+                },
+                },
+                // 动画
+                animate: true,
+            });
+            if(!this.dataList2.children){   
+            layui.loading.Load(4, "")   
+            // 初始化的图数据
+            graph.data(this.dataList)
+            layui.loading.loadRemove()
+            // 根据提供的数据渲染视图。
+            graph.render();
+            // 缩放视窗窗口到一个固定比例
+            graph.zoomTo(1);
+            // 平移图到中心将对齐到画布中心，但不缩放
+            graph.fitCenter();
+            // 点击动态加入节点
+            // 因为数据量过大,在用户点击展开时才请求获取数据
+            // 数据源里要有唯一字段 id ,不加 id g6会自动生成id,会有一些bug
+            graph.on('node:dblclick', async (e) => {
+                const item = e.item;
+                const nodeId = item.get('id');
+                const model = item.getModel();
+                const children = model.children;
+                // 没有子集加入数据
+                if ( model.isSpread){
+                _this.txhash= model.txhash;
+                _this.direction= model.direction;
+                _this.spent_txid = model.spend_txid;
+                _this.received_txid = model.received_txid;
+                this.target = _this.received_txid;
+                await _this.getData().then(layui.loading.Load(4, ""));   
+                // 不加加定时器获取不到数据
+                setTimeout(() =>{
+                graph.addChild(_this.dataList2, nodeId);
+                layui.loading.loadRemove();
+                },200)
+                // 针对唯一id 避免多次展开
+                model.isSpread = false;
+                this.count += 1        
+                }
+            });
+            graph.on('node:click',async(e)=>{
+                const item = e.item;
+                const nodeId = item.get('id');
+                const model = item.getModel();
+                const children = model.children;
+                this.target = model.text2;
+                this.value = model.text3;
+                console.log(model)
+            })
+            graph.changeData(this._dataList2)
+            if (typeof window !== 'undefined')
+                window.onresize = () => {
+                if (!graph || graph.get('destroyed')) return;
+                if (!container || !container.scrollWidth || !container.scrollHeight) return;
+                graph.changeSize(container.scrollWidth, container.scrollHeight);
+                };
+            }
+            },
+        },
+        })
+    </script>
+
+    <script>
+        layui.use(['element', 'jquery', 'loading', 'code'], function() {
+            var element = layui.element;
+            var $ = layui.jquery;
+            var loading = layui.loading;
+
+            var msg =
+                '"Do not try to become a person of success but try to become a person of value." <br><br>- Albert Einstein'
+        })
+    </script>
+	<script>
+		layui.use(['element', 'jquery', 'drawer', 'layer', 'code'], function() {
+			var element = layui.element;
+			var $ = layui.jquery;
+			var drawer = layui.drawer;
+			var layer = layui.layer;
+
+			layui.code();
+
+			$(".drawer-right").click(function() {
+				drawer.open({
+					direction: "right",
+					dom: ".layer-right",
+					distance: "30%"
+				});
+			})
+
+			$(".drawer-left").click(function() {
+
+				drawer.open({
+					direction: "left",
+					dom: ".layer-left",
+					distance: "30%"
+				});
+
+			})
+
+			$(".drawer-top").click(function() {
+				drawer.open({
+					direction: "top",
+					dom: ".layer-top",
+					distance: "30%"
+				});
+			})
+
+			$(".drawer-bottom").click(function() {
+				drawer.open({
+					direction: "bottom",
+					dom: ".layer-bottom",
+					distance: "30%"
+				});
+			})
+
+			$(".drawer-open-mask").click(function() {
+				drawer.open({
+					direction: "right",
+					dom: ".layer-open-mask",
+					distance: "30%",
+					maskClose: true
+				});
+			})
+
+			var dom;
+
+			$(".drawer-close-mask").click(function() {
+				dom = drawer.open({
+					direction: "right",
+					dom: ".layer-close-mask",
+					distance: "30%",
+					maskClose: false
+				});
+			})
+
+			$("#btnClose").click(function() {
+				dom.close();
+			})
+
+			$(".drawer-auto-close").click(function() {
+				dom = drawer.open({
+					direction: "right",
+					dom: ".layer-auto-close",
+					distance: "30%",
+					maskClose: false,
+					time: 1000
+				});
+			})
+
+			$(".drawer-call-back").click(function() {
+				dom = drawer.open({
+					direction: "right",
+					dom: ".layer-right",
+					distance: "30%",
+					success: function() {
+						layer.msg("触发回调函数", {
+							icon: 1,
+							time: 1000
+						});
+					}
+				});
+			})
+
+		})
+	</script>
+    <style>
+        .wrap {
+				display: none;
+        }
+        .load-div {
+            width: 100%;
+            height: 300px;
+            background-color: lightgray;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        #container{ width: 1500px; height: 600px; position: relative; background: #ebeeee; } #box{ position:left}
+    </style>
+</html>

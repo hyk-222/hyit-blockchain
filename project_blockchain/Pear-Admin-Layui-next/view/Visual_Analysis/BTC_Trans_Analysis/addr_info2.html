@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>控制后台</title>
+		<meta name="renderer" content="webkit">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<link rel="stylesheet" href="../../../component/pear/css/pear.css" />
+		<!-- <link rel="stylesheet" href="../../../admin/css/other/console1.css" /> -->
+		<style>
+			.divHeight{height:400px;height:auto;min-height:300px;margin:0 auto;}
+		</style>
+	</head>
+	<body class="pear-container">
+		<div>
+			<div class="layui-row layui-col-space10">
+				<div class="layui-col-xs8 layui-col-md12" style="height:185px;">
+					<div class="layui-card top-panel" style="height:170px;">
+<!--						<div class="layui-card-header">今日访问</div>-->
+						<div class="layui-card-header">地址信息&nbsp;&nbsp;&nbsp;&nbsp;
+           					<button id ="fanhui" class="loading-1 pear-btn pear-btn-primary" plain >返回</button>
+       					</div>
+						<div class="layui-card-body">
+           					<div>
+               					<label id="copy1">000000000000288bb2cdbd907a32fdff4b8d9dbc154204acc347fedec&nbsp;&nbsp;&nbsp;&nbsp;
+                   					<button id ="copytext" class="loading-1 pear-btn pear-btn-primary" plain >复制</button>
+               					</label>
+               					<br>
+               					<br>
+           					</div>
+           					<button class="loading-1 pear-btn pear-btn-primary" plain id ="yanpan">+ 地址研判</button>
+           					<button class="loading-3 pear-btn pear-btn-danger" plain id="jiankong">+ 地址监控</button>
+           					<button id="liushui" class="loading-2 pear-btn pear-btn-success" plain >+ 交易流水</button>
+       					</div>
+					</div>
+				</div>
+			</div>
+			<div class="layui-row layui-col-space10">
+				<div class="layui-col-md6">
+					<div class="layui-card">
+						<div class="layui-card-body">
+							<span>loading.Load(2,message);</span>
+               				<br>
+               				<br>
+               				<span>loading.Load(3,message);</span>
+               				<br>
+               				<br>
+               				<span>loading.Load(4,message);</span>
+               				<br>
+               				<br>
+               				<span>loading.Load(5,message);</span>
+               				<br>
+               				<br>
+               				<span>loading.remove(time);</span>
+               				<br>
+               				<br>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md6">
+					<div class="layui-card">
+<!--						<div class="layui-card-header">更 新</div>-->
+						<div class="layui-card-body">
+							<span class="icon pear-icon">&#xe68b;</span>
+               				<span>标签：</span>
+               				<span>       </span>
+							<br>
+               				<br>
+               				<span class="icon pear-icon">&#xe697;</span>
+               				<span>标注：</span>
+               				<span>       </span>
+               				<br>
+               				<br>
+               				<br>
+               				<br>
+               				<br>
+               				<br>
+							<br>
+							<br>
+						</div>
+					</div>
+				</div>
+				<div class="layui-row layui-col-space10">
+				<div class=" layui-col-md12" >
+					<div class="layui-card top-panel" >
+<!--						<div class="layui-card-header">今日访问</div>-->
+						<div class="layui-card-header">比特币（BTC）&nbsp;&nbsp;&nbsp;&nbsp;
+
+       					</div>
+						<div class="layui-card-body divHeight">
+							<table id="user-table" lay-filter="user-table"></table>
+       					</div>
+					</div>
+				</div>
+			</div>
+			</div>
+		</div>
+		<!--</div>-->
+		<script src="../../../component/layui/layui.js"></script>
+		<script src="../../../component/pear/pear.js"></script>
+		<script>
+			layui.use(['layer', 'echarts', 'element', 'count'], function() {
+				var $ = layui.jquery,
+					layer = layui.layer,
+					element = layui.element,
+					count = layui.count,
+					echarts = layui.echarts;
+
+				count.up("value1", {
+					time: 4000,
+					num: 440.34,
+					bit: 2,
+					regulator: 50
+				})
+
+				count.up("value2", {
+					time: 4000,
+					num: 236.30,
+					bit: 2,
+					regulator: 50
+				})
+
+				count.up("value3", {
+					time: 4000,
+					num: 634.43,
+					bit: 2,
+					regulator: 50
+				})
+
+				count.up("value4", {
+					time: 4000,
+					bit: 2,
+					num: 373.23,
+					regulator: 50
+				})
+
+				var echartsRecords = echarts.init(document.getElementById('echarts-records'), 'walden');
+
+				const colorList = ["#9E87FF", '#73DDFF', '#fe9a8b', '#F56948', '#9E87FF']
+				var option = {
+					backgroundColor: '#fff',
+					tooltip: {
+						show: false
+					},
+					grid: {
+						top: '10%',
+						bottom: '6%',
+						left: '6%',
+						right: '6%',
+						containLabel: true
+					},
+					xAxis: [{
+						type: 'category',
+						boundaryGap: false,
+						axisLine: {
+							show: false
+						},
+						axisTick: {
+							show: false
+						},
+						axisLabel: {
+							margin: 10,
+							textStyle: {
+								fontSize: 14,
+								color: 'rgba(#999)',
+							}
+						},
+						splitLine: {
+							show: true,
+							lineStyle: {
+								color: '#939ab6',
+								opacity: .15
+							}
+						},
+						data: ['10:00', '10:10', '10:10', '10:30', '10:40', '10:50']
+					}, ],
+					yAxis: [{
+						type: 'value',
+						offset: 15,
+						max: 100,
+						min: 0,
+						axisTick: {
+							show: false
+						},
+						axisLine: {
+							show: false
+						},
+						axisLabel: {
+							margin: 10,
+							textStyle: {
+								fontSize: 14,
+								color: '#999',
+							}
+						},
+						splitLine: {
+							show: false
+						}
+
+					}],
+					series: [{
+						name: '2',
+						type: 'line',
+						z: 3,
+						showSymbol: false,
+						smoothMonotone: 'x',
+						lineStyle: {
+							width: 3,
+							color: {
+								type: 'linear',
+								x: 0,
+								y: 0,
+								x2: 0,
+								y2: 1,
+								colorStops: [{
+									offset: 0,
+									color: 'rgba(59,102,246)' // 0% 处的颜色
+								}, {
+									offset: 1,
+									color: 'rgba(118,237,252)' // 100% 处的颜色
+								}]
+							},
+							shadowBlur: 4,
+							shadowColor: 'rgba(69,126,247,.2)',
+							shadowOffsetY: 4
+						},
+						areaStyle: {
+							normal: {
+								color: {
+									type: 'linear',
+									x: 0,
+									y: 0,
+									x2: 0,
+									y2: 1,
+									colorStops: [{
+										offset: 0,
+										color: 'rgba(227,233,250,.9)' // 0% 处的颜色
+									}, {
+										offset: 1,
+										color: 'rgba(248,251,252,.3)' // 100% 处的颜色
+									}]
+								}
+							}
+						},
+						smooth: true,
+						data: [20, 56, 17, 40, 68, 42]
+					}, {
+						name: '1',
+						type: 'line',
+						showSymbol: false,
+						smoothMonotone: 'x',
+
+						lineStyle: {
+							width: 3,
+							color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+								offset: 0,
+								color: 'rgba(255,84,108)'
+							}, {
+								offset: 1,
+								color: 'rgba(252,140,118)'
+							}], false),
+							shadowBlur: 4,
+							shadowColor: 'rgba(253,121,128,.2)',
+							shadowOffsetY: 4
+						},
+						areaStyle: {
+							color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+								offset: 0,
+								color: 'rgba(255,84,108,.15)'
+							}, {
+								offset: 1,
+								color: 'rgba(252,140,118,0)'
+							}], false),
+						},
+						smooth: true,
+						data: [20, 71, 8, 50, 57, 32]
+					}, ]
+
+				};
+				echartsRecords.setOption(option);
+
+				window.onresize = function() {
+					echartsRecords.resize();
+				}
+
+			});
+		</script>
+		<script>
+			layui.use(['table', 'form', 'jquery', 'drawer', 'dropdown'], function() {
+				let table = layui.table;
+				let form = layui.form;
+				let $ = layui.jquery;
+				let drawer = layui.drawer;
+				let dropdown = layui.dropdown;
+
+				let MODULE_PATH = "/system/user/";
+
+				let cols = [
+					[{
+							type: 'checkbox'
+						},
+						{
+							title: '账号',
+							field: 'username',
+							align: 'center',
+							width: 100
+						},
+						{
+							title: '姓名',
+							field: 'realName',
+							align: 'center'
+						},
+						{
+							title: '性别',
+							field: 'sex',
+							align: 'center',
+							width: 80,
+							templet: '#user-sex'
+						},
+						{
+							title: '电话',
+							field: 'phone',
+							align: 'center'
+						},
+						{
+							title: '启用',
+							field: 'enable',
+							align: 'center',
+							templet: '#user-enable'
+						},
+						{
+							title: '登录',
+							field: 'login',
+							align: 'center',
+							templet: '#user-login'
+						},
+						{
+							title: '注册',
+							field: 'createTime',
+							align: 'center',
+							templet: '#user-createTime'
+						},
+						{
+							title: '操作',
+							toolbar: '#user-bar',
+							align: 'left',
+							width: 160,
+							fixed: 'right'
+						}
+					]
+				]
+
+				table.render({
+					elem: '#user-table',
+					url: '../../../admin/data/table.json',
+					page: true,
+					cols: cols,
+					skin: 'line',
+					toolbar: '#user-toolbar',
+					defaultToolbar: [{
+						layEvent: 'refresh',
+						icon: 'layui-icon-refresh',
+					}, 'filter', 'print', 'exports'],
+					done: function(res, curr, count) {
+						for (var i = 0; i < res.data.length; i++) {
+							dropdown.render({
+								elem: '#more_' + res.data[i].userId,
+								data: [{
+									title: 'menu item11',
+									id: 100
+								}, {
+									title: 'menu item22',
+									id: 101
+								}, {
+									title: 'menu item33',
+									id: 102
+								}],
+								id: '#more_' + res.data[i].userId,
+								click: function(obj) {
+									layer.tips('点击了：' + obj.title, this.elem, {
+										tips: [1, '#5FB878']
+									})
+								}
+							});
+						}
+					}
+				});
+
+				table.on('tool(user-table)', function(obj) {
+					if (obj.event === 'remove') {
+						window.remove(obj);
+					} else if (obj.event === 'edit') {
+						window.edit(obj);
+					}
+				});
+
+				table.on('toolbar(user-table)', function(obj) {
+					if (obj.event === 'add') {
+						window.add();
+					} else if (obj.event === 'refresh') {
+						window.refresh();
+					} else if (obj.event === 'batchRemove') {
+						window.batchRemove(obj);
+					}
+				});
+
+				form.on('submit(user-query)', function(data) {
+					table.reload('user-table', {
+						where: data.field
+					})
+					return false;
+				});
+
+				form.on('switch(user-enable)', function(obj) {
+					layer.tips(this.value + ' ' + this.name + '：' + obj.elem.checked, obj.othis);
+				});
+
+				window.add = function() {
+					drawer.open({
+						direction: "top",
+						dom: ".layer-top",
+						distance: "30%"
+					});
+				}
+
+				window.edit = function(obj) {
+					layer.msg("修改");
+				}
+
+				window.remove = function(obj) {
+					layer.confirm('确定要删除该用户', {
+						icon: 3,
+						title: '提示'
+					}, function(index) {
+						layer.close(index);
+						let loading = layer.load();
+						$.ajax({
+							url: MODULE_PATH + "remove/" + obj.data['userId'],
+							dataType: 'json',
+							type: 'delete',
+							success: function(result) {
+								layer.close(loading);
+								if (result.success) {
+									layer.msg(result.msg, {
+										icon: 1,
+										time: 1000
+									}, function() {
+										obj.del();
+									});
+								} else {
+									layer.msg(result.msg, {
+										icon: 2,
+										time: 1000
+									});
+								}
+							}
+						})
+					});
+				}
+
+				window.batchRemove = function(obj) {
+					let data = table.checkStatus(obj.config.id).data;
+					if (data.length === 0) {
+						layer.msg("未选中数据", {
+							icon: 3,
+							time: 1000
+						});
+						return false;
+					}
+					let ids = "";
+					for (let i = 0; i < data.length; i++) {
+						ids += data[i].userId + ",";
+					}
+					ids = ids.substr(0, ids.length - 1);
+					layer.confirm('确定要删除这些用户', {
+						icon: 3,
+						title: '提示'
+					}, function(index) {
+						layer.close(index);
+						let loading = layer.load();
+						$.ajax({
+							url: MODULE_PATH + "batchRemove/" + ids,
+							dataType: 'json',
+							type: 'delete',
+							success: function(result) {
+								layer.close(loading);
+								if (result.success) {
+									layer.msg(result.msg, {
+										icon: 1,
+										time: 1000
+									}, function() {
+										table.reload('user-table');
+									});
+								} else {
+									layer.msg(result.msg, {
+										icon: 2,
+										time: 1000
+									});
+								}
+							}
+						})
+					});
+				}
+
+				window.refresh = function(param) {
+					table.reload('user-table');
+				}
+			})
+		</script>
+	</body>
+</html>

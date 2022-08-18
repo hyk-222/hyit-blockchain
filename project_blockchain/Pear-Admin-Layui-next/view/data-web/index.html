@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+  <link rel="stylesheet" href="css/index.css" />
+  <script src="js/jquery.js"></script>
+
+
+</head>
+
+<body>
+  <header>
+    <h1>虚拟货币交易监控平台</h1>
+    <div class="showTime">当前时间：2022年4月<span></span></div>
+  </header>
+  <section class="mainbox">
+    <div class="column">
+      <div class="panel bar">
+        <h2>
+          交易所交易详情
+        </h2>
+        <div class="chart" id="echarts1"></div>
+        <div class="panel-footer"></div>
+      </div>
+      <div class="panel line">
+        <h2>BTC近十五日交易额</h2>
+        <div class="chart"></div>
+        <div class="c"></div>
+      </div>
+      <div class="panel pie">
+        <h2>比特币今日交易详情</h2>
+        <div class="chart"></div>
+        <div class="panel-footer"></div>
+      </div>
+    </div>
+    <div class="column">
+      <div class="no">
+        <div class="no-hd">
+          <ul>
+            <li>BTC</li>
+            <li id="height">104563</li>
+          </ul>
+        </div>
+        <div class="no-bd">
+          <ul>
+            <li>货币名称</li>
+            <li>最新区块</li>
+          </ul>
+        </div>
+      </div>
+      <div class="map">
+        <div class="chart"></div>
+        <div class="map1"></div>
+        <div class="map2"></div>
+        <div class="map3"></div>
+      </div>
+    </div>
+    <div class="column">
+      <div class="panel bar1">
+        <h2>今日交易大额地址</h2>
+        <div class="chart"></div>
+        <div class="panel-footer"></div>
+      </div>
+      <div class="panel line1">
+        <h2>24小时价格监控</h2>
+        <div class="chart"></div>
+        <div class="panel-footer"></div>
+      </div>
+      <div class="panel pie1">
+        <h2>交易所交易占比</h2>
+        <div class="chart"></div>
+        <div class="panel-footer"></div>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/flexible.js"></script>
+ <script src="https://www.jq22.com/jquery/echarts-4.2.1.min.js"></script>
+  <script src="js/index.js"></script>
+  <script src="js/china.js"></script>
+  <script src="js/myMap.js"></script>
+{#  <script src="js/jquery.js"></script>#}
+
+  <script>
+    (function (fn) {
+      fn();
+      setInterval(fn, 1000);
+    })(function () {
+     var dt = new Date();
+      document.querySelector(".showTime span").innerHTML =
+        dt.getDate() + "日-" +
+        dt.getHours() + "时" +
+        dt.getMinutes() + "分" +
+        dt.getSeconds() + "秒";
+
+    });
+  </script>
+</body>
+
+</html>
