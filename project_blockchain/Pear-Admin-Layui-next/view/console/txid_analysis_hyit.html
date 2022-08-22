@@ -15,17 +15,17 @@
         <script src="../../component/pear/pear.js"></script>
     </head>
     <body>
-        <div id="container" class="layui-row layui-col-space12"  style="background: #eeeeee"> 
+        <div id="container" class="layui-row layui-col-space12"  style="background: #eeeeee">
             <div id="parentcontent" ref="parentContent" class="layui-col-md10">
                 <div class="layui-row layui-col-space9">
                     <div id="num" class="layui-form layui-row layui-col-md2" >
-                        <select id="num" lay-filter="a" lay-verify=""> 
+                        <select id="num" lay-filter="a" lay-verify="">
                             <option value="">请选择展开地址数量</option>
                             <option value="2">2</option>
                             <option value="5">5</option>
                             <option value="10">10</option>
                         </select>
-                    </div> 
+                    </div>
                     <div class="layui-col-md8 layui-input-inline">
                         <input type="text" name="keyword" placeholder="请输入交易哈希" class="layui-input">
                     </div>
@@ -35,7 +35,7 @@
                         <i class="layui-icon layui-icon-refresh"></i>重置</button>
                 </div>
                 <div class="layui-col-space9" id="pic" ref="pic" style="right: 0%;">
-                </div>   
+                </div>
             </div>
             <div class="layui-col-md2">
                 <div class="layui-card ">
@@ -43,7 +43,7 @@
                     <div class="layui-card-body" id="trans_info">
                         <!-- {{a()}} -->
                         <ul class="list" style="height: 500px;">
-                            <li class="list-item"><span class="title layui-font-16">{{type}}<br></span><span class="footer">{{target}}</span></li><br>
+                            <li class="list-item"><span class="title layui-font-16">TXID<br></span><span class="footer">{{target}}</span></li><br>
                             <li class="list-item "><span class="title layui-font-16">输入金额</span><br><span class="footer">{{value}}</span></li><br>
                             <li class="list-item"><span class="title layui-font-16">输出金额</span><br><span class="footer">{{1}}</span></li><br>
                             <li class="list-item"><span class="title layui-font-16">手续费</span><br><span class="footer">{{1}}</span></li><br>
@@ -53,7 +53,7 @@
                 </div>
                 <div class="layui-card">
                     <div class="layui-card-header">
-                        
+
                         <button class="pear-btn pear-btn-sm" id="input_btn" onclick="showDiv('div1');">输 入 地 址</button>
                         <button class="pear-btn pear-btn-sm" id="output_btn" onclick="showDiv('div2');">输 出 地 址</button>
                     </div>
@@ -65,8 +65,9 @@
                     </div>
                 </div>
             </div>
+
         </div>
-    <script> 
+    <script>
         //  自定义展开数量
         var storage=window.localStorage;
         var spreadNum;
@@ -76,7 +77,7 @@
                 var loading = layui.loading;
                 var form = layui.form;
                 var layer = layui.layer;
-                layui.form.on('select(a)', function(data){ 
+                layui.form.on('select(a)', function(data){
                     spreadNum_now = data.value;
                     if(!window.localStorage){
                         alert("浏览器支持localstorage");
@@ -91,7 +92,7 @@
                         location.reload()
                     }
                 });
-            }) 
+            })
         var spreadNum_default=storage.getItem("spreadNum_default")
         var spreadNum_now=storage.getItem("spreadNum_now")
         var default_txid = storage.getItem("search_txid")
@@ -123,59 +124,64 @@
         methods: {
             // 从api获取初始数据
             async getRoot() {
-            let data;
-            let data2;
+            let inputs_data;
+            let outputs_data;
+            const root = {}; // 接收参数
             this.type = '交易哈希号'
-            const root = {};
-            // 接收参数
             var tx = document.location.href.split('=');
             // const search_txid = tx[1]
-            let search_txid="f5b389e3e95f877a5125b33abf5954ffb150e18b294b714d85b0ccf0e6bc06af";
-            storage.setItem("search_txid",search_txid);
-            
-            let url1 = 'https://chain.so/api/v2/tx/BTC/' + search_txid;
+            let search_txid="31999c6bd7024d7c2cf04fb0bc2fe536d07d8eb7a9828c5b52229209d3727cdb";
+            let url2 = 'http://127.0.0.1:8000/transaction_pre_query?txid=' + search_txid;
+            await axios.get(url2).then(res => {
+                inputs_data = res.data.data;
+                console.log(inputs_data)
+            });
+            let url1 = 'http://127.0.0.1:8000/transaction_next_query?txid=' + search_txid;
             await axios.get(url1).then(res => {
-                data = res.data.data;
-                })
+                outputs_data = res.data.data;
+                console.log(outputs_data);
+            });
+
             root.id = '1';
             root.nood = 0;
             root.direction = 0;
             root.children = [];
             for(let i=0;i<spreadNum;i++){
-                if(data.inputs[i]){
+                if(outputs_data[i]){
                 let child = {};
                 child.id = 'i-'+i;
                 child.nood = 2;
-                child.direction = 1;
-                if(data.inputs[i].received_from !== null){
+                child.direction = 2;
+                if(outputs_data[i].next_hash !== null){
                     child.isSpread = true;
-                    child.received_txid = data.inputs[i].received_from.txid;
+                    child.spent_txid = outputs_data[i].next_hash;
                 }else{
                     child.isSpread = false;
-                    };          
+                    };
                 child.text1 = 'BTC',
-                child.text3 = data.inputs[i].value + "BTC",
-                child.text2 = data.inputs[i].address,
+                child.text3 = outputs_data[i].value + "BTC",
+                child.text2 = outputs_data[i].output_address,
                 child.url = "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg",
                 root.children.push(child);
                 }
-                if(data.outputs[i]){
+                if(inputs_data[i]){
                 let child = {}
                 child.id = 'o-'+i;
                 child.nood = 2;
-                child.direction = 2;
-                if(data.outputs[i].spent !== null){
+                child.direction = 1;
+                if(inputs_data[i].pre_hash !== null){
                     child.isSpread = true;
-                    child.spend_txid = data.outputs[i].spent.txid;
+                    child.received_txid = inputs_data[i].pre_hash;
                 }else{child.isSpread = false;}
                 child.text1 = 'BTC'
-                child.text3 = data.outputs[i].value + "BTC",
-                child.text2 = data.outputs[i].address
+                child.text3 = inputs_data[i].value + "BTC",
+                child.text2 = inputs_data[i].input_address
                 child.url = "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg",
                 root.children.push(child)
                 }
             }
             this.dataList = root;
+            console.log(this.dataList)
             this.render();
             },
             // 动态加载的数据
@@ -186,41 +192,43 @@
             let spent_txid = this.spent_txid
             let received_txid = this.received_txid
             let num = this.count;
+            console.log(this.received_txid)
             if(spent_txid!==undefined && received_txid == undefined){
-                let url1 = 'https://chain.so/api/v2/tx/BTC/' + spent_txid
+                let url1 = 'http://127.0.0.1:8000/transaction_next_query?txid=' + spent_txid;
                 await axios.get(url1).then(res => {
-                    data = res.data.data;
-                    });
+                    outputs_data = res.data.data;
+                    console.log(outputs_data)
+                });
                 const child = []
-                if(data.outputs.length >= spreadNum){
+                if(outputs_data.length >= spreadNum){
                 for(let i=0;i<spreadNum;i++){
                     const outputs = {}
                     outputs.id = num + '-' + i;
                     outputs.nood = 2;
                     outputs.direction = 2;
                     outputs.text1 = 'BTC';
-                    outputs.text2 = data.outputs[i].address;
-                    outputs.text3 = data.outputs[i].value + 'BTC';
+                    outputs.text2 = outputs_data[i].output_address;
+                    outputs.text3 = outputs_data[i].value + 'BTC';
                     outputs.url = "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg";
-                    if(data.outputs[i].spent !== null){
+                    if(outputs_data[i].next_hash !== null){
                     outputs.isSpread = true;
-                    outputs.spend_txid = data.outputs[i].spent.txid;
+                    outputs.spent_txid = outputs_data[i].next_hash;
                     }else{outputs.isSpread = false;}
                     child.push(outputs)
                 }
                 }else{
-                    for(let i=0;i<data.outputs.length;i++){
+                    for(let i=0;i<outputs_data.length;i++){
                     const outputs = {}
                     outputs.id = num + '-' + i;
                     outputs.nood = 2;
                     outputs.direction = 2;
                     outputs.text1 = 'BTC';
-                    outputs.text2 = data.outputs[i].address;
-                    outputs.text3 = data.outputs[i].value + 'BTC';
+                    outputs.text2 = outputs_data[i].address;
+                    outputs.text3 = outputs_data[i].value + 'BTC';
                     outputs.url = "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg";
-                    if(data.outputs[i].spent !== null){
+                    if(outputs_data[i].next_hash !== null){
                     outputs.isSpread = true;
-                    outputs.spend_txid = data.outputs[i].spent.txid;
+                    outputs.spent_txid = outputs_data[i].next_hash ;
                     }else{outputs.isSpread = false;}
                     child.push(outputs)
                 }
@@ -237,12 +245,12 @@
                                 url: "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg",};
             };
             if(received_txid!==undefined && spent_txid == undefined){
-                let url1 = 'https://chain.so/api/v2/tx/BTC/' + received_txid
-                await axios.get(url1).then(res => {
-                    data2 = res.data.data;
+                let url2 = 'http://127.0.0.1:8000/transaction_pre_query?txid=' + received_txid
+                await axios.get(url2).then(res => {
+                    inputs_data = res.data.data;
                     });
                 const child = []
-                if(data2.inputs.length >= spreadNum){
+                if(inputs_data.length >= spreadNum){
                 for(let i=0;i<spreadNum;i++){
                     const inputs = {}
                     inputs.id = 'i' + num + '-' + i;
@@ -250,28 +258,28 @@
                     inputs.direction = 1;
                     inputs.text1 = 'BTC';
                     inputs.url = "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg";
-                    inputs.text2 = data2.inputs[i].address;
-                    inputs.text3 = data2.inputs[i].value + 'BTC';
-                    if(data2.inputs[i].received_from !== null){
+                    inputs.text2 = inputs_data[i].input_address;
+                    inputs.text3 = inputs_data[i].value + 'BTC';
+                    if(inputs_data[i].pre_hash !== null){
                     inputs.isSpread = true;
-                    inputs.received_txid = data2.inputs[i].received_from.txid;
-                    }else{outputs.isSpread = false;}
+                    inputs.received_txid = inputs_data[i].pre_hash;
+                    }else{inputs.isSpread = false;}
                     child.push(inputs)
                 }
                 }else{
-                for(let i=0;i<data2.inputs.length;i++){
+                for(let i=0;i<inputs_data.length;i++){
                     const inputs = {}
                     inputs.id = 'i' + num + '-' + i;
                     inputs.nood = 2;
                     inputs.direction = 1;
                     inputs.text1 = 'BTC';
                     inputs.url = "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg";
-                    inputs.text2 = data2.inputs[i].address;
-                    inputs.text3 = data2.inputs[i].value + 'BTC';
-                    if(data2.inputs[i].received_from !== null){
+                    inputs.text2 = inputs_data[i].address;
+                    inputs.text3 = inputs_data[i].value + 'BTC';
+                    if(inputs_data.pre_hash !== null){
                     inputs.isSpread = true;
-                    inputs.received_txid = data2.inputs[i].received_from.txid;
-                    }else{outputs.isSpread = false;}
+                    inputs.received_txid = inputs_data[i].pre_hash;
+                    }else{inputs.isSpread = false;}
                     child.push(inputs)
                 }
                 }
@@ -421,7 +429,7 @@
                         name: 'rect-shape',
                     });
                     /* 第一个图标 */
-                    if(!cfg.isSpread&&cfg.node==1){                    
+                    if(!cfg.isSpread&&cfg.node==1){
                         group.addShape('image', {
                         attrs: {
                         x: cfg.direction == '2' ? 13 : 23,
@@ -431,7 +439,7 @@
                         img: '../../admin/images/un.svg',
                         },
                         name: 'state-icon',
-                    })}else{                        
+                    })}else{
                         group.addShape('image', {
                         attrs: {
                         x: cfg.direction == '2' ? 13 : 23,
@@ -505,7 +513,7 @@
                             fill: '#fff',
                             lineWidth: 1,
                             cursor: 'pointer', // 鼠标变手
-                            
+
                         },
                         name: 'collapse-icon',
                         });
@@ -530,7 +538,7 @@
                 },
                 },
                 'single-node',
-            );            
+            );
             const pic = document.getElementById('graph');// 获取容器id
             const parentcontent = document.getElementById('parentcontent');// 获取容器id
             const container = document.getElementById('container');// 获取容器id
@@ -639,7 +647,7 @@
                 // V —— 根节点在中间，垂直对称布局
                 direction: 'H',
                 // 判断节点向左还是向右
-                getSide: (d) => { 
+                getSide: (d) => {
                     if (d.data.direction == '2') {
                     return 'right';
                     }
@@ -671,8 +679,8 @@
             });
             //默认展示txid
             this.target = fittingString(default_txid,130,12)
-            if(!this.dataList2.children){   
-                layui.loading.Load(4, "")   
+            if(!this.dataList2.children){
+                layui.loading.Load(4, "")
                 // 初始化的图数据
                 graph.data(this.dataList)
                 layui.loading.loadRemove()
@@ -686,7 +694,6 @@
                 // 因为数据量过大,在用户点击展开时才请求获取数据
                 // 数据源里要有唯一字段 id ,不加 id g6会自动生成id,会有一些bug
                 graph.on('node:dblclick', async (e) => {
-                    const point = graph.getGraphCenterPoint();
                     const item = e.item;
                     const nodeId = item.get('id');
                     const model = item.getModel();
@@ -696,10 +703,10 @@
                     if ( model.isSpread){
                         _this.txhash= model.txhash;
                         _this.direction= model.direction;
-                        _this.spent_txid = model.spend_txid;
+                        _this.spent_txid = model.spent_txid;
                         _this.received_txid = model.received_txid;
                         _this.target = _this.received_txid
-                        await _this.getData().then(layui.loading.Load(4, ""));   
+                        await _this.getData().then(layui.loading.Load(4, ""));
                         // 不加加定时器获取不到数据
                         setTimeout(() =>{
                             graph.addChild(_this.dataList2, nodeId);
@@ -707,7 +714,7 @@
                         },200)
                         // 针对唯一id 避免多次展开
                         model.isSpread = false;
-                        this.count += 1        
+                        this.count += 1
                     }
                 });
                 graph.on('node:click',async(e)=>{
@@ -718,6 +725,7 @@
                     if(model.text1 == 'BTC-HASH'){this.type = '交易哈希号'}else{this.type = '交易地址'}
                     this.target = model.text2;
                     this.target = fittingString(model.text2,130,12);
+                    console.log(this.target)
                     this.value = model.text3;
                 })
             };
@@ -772,11 +780,11 @@
             margin-top: 10px;
         }
         #graph{
-            height: 800; background: #ffbaba; 
-        }  
+             background: #ffbaba;
+        }
         #cotainer{
-            height: 800px; background: #ffbaba; 
-        }  
+            height: 800px; background: #ffbaba;
+        }
     </style>
 </body>
 </html>
