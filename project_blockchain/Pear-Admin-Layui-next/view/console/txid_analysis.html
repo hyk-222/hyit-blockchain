@@ -16,10 +16,9 @@
     </head>
     <body>
         <div id="container" class="layui-row layui-col-space12"  style="background: #eeeeee"> 
-
-            <div id="parentcontent" class="layui-card layui-col-md10">
-                <div class="layui-row layui-col-space10">
-                    <div id="num" class="layui-card-head layui-form layui-row layui-col-md2" >
+            <div id="parentcontent" ref="parentContent" class="layui-col-md10">
+                <div class="layui-row layui-col-space9">
+                    <div id="num" class="layui-form layui-row layui-col-md2" >
                         <select id="num" lay-filter="a" lay-verify=""> 
                             <option value="">请选择展开地址数量</option>
                             <option value="2">2</option>
@@ -35,7 +34,7 @@
                     <button type="reset" class="pear-btn pear-btn-md">
                         <i class="layui-icon layui-icon-refresh"></i>重置</button>
                 </div>
-                <div class="layui-card-body" id="pic">
+                <div class="layui-col-space9" id="pic" ref="pic" style="right: 0%;">
                 </div>   
             </div>
             <div class="layui-col-md2">
@@ -44,8 +43,8 @@
                     <div class="layui-card-body" id="trans_info">
                         <!-- {{a()}} -->
                         <ul class="list" style="height: 500px;">
-                            <li class="list-item"><span class="title layui-font-16">TXID<br></span><span class="footer">{{count}}</span></li><br>
-                            <li class="list-item "><span class="title layui-font-16">输入金额</span><br><span class="footer">{{1}}</span></li><br>
+                            <li class="list-item"><span class="title layui-font-16">TXID<br></span><span class="footer">{{target}}</span></li><br>
+                            <li class="list-item "><span class="title layui-font-16">输入金额</span><br><span class="footer">{{value}}</span></li><br>
                             <li class="list-item"><span class="title layui-font-16">输出金额</span><br><span class="footer">{{1}}</span></li><br>
                             <li class="list-item"><span class="title layui-font-16">手续费</span><br><span class="footer">{{1}}</span></li><br>
                             <li class="list-item"><span class="title layui-font-16">交易时间</span><br><span class="footer">{{1}}</span></li><br>
@@ -66,14 +65,11 @@
                     </div>
                 </div>
             </div>
+        <selection>
+            <div>11</div>
+            <div>22</div>
+        </selection>
         </div>
-    <script type="text/javascript">
-        // var selectedIndex = getCookie("num");
-        // if(selectedIndex != null) {
-        //     document.getElementById("num").selectedIndex = selectedIndex;
-        // }
-        console.log(document.getElementById("num"))
-    </script>
     <script> 
         //  自定义展开数量
         var storage=window.localStorage;
@@ -102,8 +98,8 @@
             }) 
         var spreadNum_default=storage.getItem("spreadNum_default")
         var spreadNum_now=storage.getItem("spreadNum_now")
+        var default_txid = storage.getItem("search_txid")
         if(!spreadNum_now){spreadNum=2}else{spreadNum = spreadNum_now;}
-        console.log(spreadNum_now)
         var vm = new Vue({
         el: '#container',
         data() {
@@ -113,8 +109,6 @@
             id: "",
             count: 1,
             direction: 0,
-            canvasWidth: 0,
-            canvasHeigth: 0,
             target: '',
             value: '',
             }
@@ -139,6 +133,7 @@
             var tx = document.location.href.split('=');
             // const search_txid = tx[1]
             let search_txid="a893e394120135be6431254bc5b7184b33ec1fe8eb38e88a4ba05e30f04e3966";
+            storage.setItem("search_txid",search_txid);
             let url1 = 'https://chain.so/api/v2/tx/BTC/' + search_txid;
             await axios.get(url1).then(res => {
                 data = res.data.data;
@@ -186,7 +181,6 @@
             },
             // 动态加载的数据
             async getData(){
-            console.log(spreadNum); //得到被选中的值             
             let data;
             let data2;
             const root = {};
@@ -199,7 +193,6 @@
                     data = res.data.data;
                     });
                 const child = []
-                console.log(data.outputs.length)
                 if(data.outputs.length >= spreadNum){
                 for(let i=0;i<spreadNum;i++){
                     const outputs = {}
@@ -429,16 +422,27 @@
                         name: 'rect-shape',
                     });
                     /* 第一个图标 */
-                    group.addShape('image', {
+                    if(!cfg.isSpread&&cfg.node==1){                    
+                        group.addShape('image', {
                         attrs: {
                         x: cfg.direction == '2' ? 13 : 23,
                         y: 8,
                         height: 14,
                         width: 14,
-                        img: 'https://gw.alipayobjects.com/zos/basement_prod/300a2523-67e0-4cbf-9d4a-67c077b40395.svg',
+                        img: '../../admin/images/un.svg',
                         },
                         name: 'state-icon',
-                    });
+                    })}else{                        
+                        group.addShape('image', {
+                        attrs: {
+                        x: cfg.direction == '2' ? 13 : 23,
+                        y: 8,
+                        height: 14,
+                        width: 14,
+                        img: '../../admin/images/spent.svg',
+                        },
+                        name: 'state-icon',
+                    })}
                     /* 第二个图标 */
                     group.addShape('image', {
                         attrs: {
@@ -532,12 +536,8 @@
             const parentcontent = document.getElementById('parentcontent');// 获取容器id
             const container = document.getElementById('container');// 获取容器id
             const num = document.getElementById('num');// 获取容器id
-            const width = parentcontent.scrollWidth || 1520; // 宽
+            const width = _this.$refs.pic.clientWidth || 1520; // 宽
             const height = container.scrollHeight || 816; // 高
-            // const width = 500; // 宽
-            // const height = 550; // 高
-            console.log(_this)
-
             const graph = new G6.TreeGraph({
                 // 图的  DOM 容器，可以传入该 DOM 的 id 或者直接传入容器的 HTML 节点对象。
                 container: 'pic',
@@ -643,6 +643,7 @@
                 // 动画
                 animate: true,
             });
+            this.target = fittingString(default_txid,130,12)
             if(!this.dataList2.children){   
                 layui.loading.Load(4, "")   
                 // 初始化的图数据
@@ -671,7 +672,7 @@
                         _this.direction= model.direction;
                         _this.spent_txid = model.spend_txid;
                         _this.received_txid = model.received_txid;
-                        this.target = _this.received_txid;
+                        _this.target = _this.received_txid
                         await _this.getData().then(layui.loading.Load(4, ""));   
                         // 不加加定时器获取不到数据
                         setTimeout(() =>{
@@ -689,10 +690,26 @@
                     const model = item.getModel();
                     const children = model.children;
                     this.target = model.text2;
+                    this.target = fittingString(model.text2,130,12);
+                    console.log(this.target)
                     this.value = model.text3;
                 })
             };
             graph.changeData(this._dataList2);
+            const self = this
+                setTimeout(() => {
+                // todo 浏览器窗口发生变化时
+                window.onresize = function () {
+                // todo 获取div parentContent 的宽度和高度
+                this.canvasWidth = self.$refs.parentContent.clientWidth
+                this.canvasHeight = self.$refs.parentContent.clientHeight
+                // todo 修改画布的大小
+                graph.changeSize(this.canvasWidth, this.canvasHeight)
+                // todo 将图移动到画布中心位置
+                graph.fitCenter()
+                console.log(this.canvasHeight)
+                }
+            }, 20)
             if (typeof window !== 'undefined'){
                 window.onresize = () => {
                 if (!graph || graph.get('destroyed')) return;
@@ -704,7 +721,8 @@
             }
             }
             })
-        storage.clear();
+        storage.removeItem('spreadNum_default');
+        storage.removeItem('spreadNum_now');
     </script>
 
     <script>
