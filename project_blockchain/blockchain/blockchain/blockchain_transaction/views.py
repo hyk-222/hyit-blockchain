@@ -23,7 +23,7 @@ def transaction_analysis(request):
                 for i in range(len(prehash_list)):
                     hash = prehash_list[n]
                     sql2 = "SELECT bitcoin_inputs.transaction_hash 'pre_transaction' " \
-                           "FROM `bitcoin_inputs`,bitcoin_outputs,bitcoin_transactions " \
+                           "FROM bitcoin_inputs,bitcoin_outputs,bitcoin_transactions " \
                            "WHERE  bitcoin_inputs.spending_transaction_hash = bitcoin_outputs.transaction_hash " \
                            "AND bitcoin_outputs.transaction_hash = bitcoin_transactions.`hash` " \
                            "and bitcoin_transactions.hash = '{0}'".format(hash)
@@ -38,7 +38,7 @@ def transaction_analysis(request):
                         print("未查询到！")
                         break
             else:
-                sql1 = "SELECT bitcoin_inputs.transaction_hash 'pre_transaction' FROM `bitcoin_inputs`,bitcoin_outputs,bitcoin_transactions WHERE  bitcoin_inputs.spending_transaction_hash = bitcoin_outputs.transaction_hash " \
+                sql1 = "SELECT bitcoin_inputs.transaction_hash 'pre_transaction' FROM bitcoin_inputs,bitcoin_outputs,bitcoin_transactions WHERE  bitcoin_inputs.spending_transaction_hash = bitcoin_outputs.transaction_hash " \
                        "AND bitcoin_outputs.transaction_hash = bitcoin_transactions.`hash` " \
                        "and bitcoin_transactions.hash = '{0}'".format(get_hash)
                 pre_hash = mysqlutil.queryOperation(sql1)
@@ -119,7 +119,8 @@ def transaction_search(request):
         output_list = []
         sql3 = "select bitcoin_outputs.recipient 'out_address',bitcoin_outputs.value*POWER(10,-8) 'out_value' from bitcoin_outputs where transaction_hash='{0}'".format(
             get_hash)
-        sql5 = "select bitcoin_outputs.recipient 'pro_outadd',bitcoin_outputs.value*POWER(10,-8) 'input_value',bitcoin_inputs.spending_transaction_hash 'next_hash' from bitcoin_inputs,bitcoin_outputs where bitcoin_inputs.transaction_hash=bitcoin_outputs.transaction_hash and bitcoin_outputs.index =bitcoin_inputs.index and bitcoin_outputs.transaction_hash='{0}'".format(
+        sql5 = "select bitcoin_outputs.recipient 'pro_outadd',bitcoin_outputs.value*POWER(10,-8) 'input_value',bitcoin_inputs.spending_transaction_hash 'next_hash'" \
+               " from bitcoin_inputs,bitcoin_outputs where bitcoin_inputs.transaction_hash=bitcoin_outputs.transaction_hash and bitcoin_outputs.index =bitcoin_inputs.index and bitcoin_outputs.transaction_hash='{0}'".format(
             get_hash)
         next_info_address = mysqlutil.queryOperation(sql3)
         next_info_hash = mysqlutil.queryOperation(sql5)
@@ -218,78 +219,61 @@ def transaction_search_output(request):
     data.append(output_list)  # data.append({'output': output_list})
     print(data)
     return HttpResponse(json.dumps({'code': 0, 'msg': '', 'count': 2, 'data': data}))
+# def address_search_input(request):
 
 
 def transaction_pre_query(request):
     mysqlutil = MySQL_util(mysqldb.mysql_conf)
     if request.method == 'GET':
-        get_hash = request.GET.get("hash_query")
-        """
-        向前查询
-        """
-        sql = "SELECT bitcoin_inputs.transaction_hash 'pre_hash',bitcoin_inputs.value 'input_value',bitcoin_inputs.recipient 'input_address',bitcoin_inputs.spending_index From bitcoin_inputs where bitcoin_inputs.spending_transaction_hash='{0}'".format(
-            get_hash)
-        pre_info_list = mysqlutil.queryOperation(sql)
-        if pre_info_list:
-            data = []
-            for pre_info in pre_info_list:
-                hash_dict = {
-                    'pre_hash': pre_info[0],
-                    'value': pre_info[1],
-                    'input_address': pre_info[2],
-                    'hash': get_hash,
-                }
-                data.append(hash_dict)
+        get_hash = request.GET.get('txid')
+    # get_hash = "31999c6bd7024d7c2cf04fb0bc2fe536d07d8eb7a9828c5b52229209d3727cdb"
+    """
+    向前查询
+    """
+    sql = "SELECT bitcoin_inputs.transaction_hash 'pre_hash',bitcoin_inputs.value 'input_value',bitcoin_inputs.recipient 'input_address',bitcoin_inputs.spending_index " \
+          "From bitcoin_inputs where bitcoin_inputs.spending_transaction_hash='{0}'".format(get_hash)
+    pre_info_list = mysqlutil.queryOperation(sql)
+    print(get_hash)
+    data = []
+    if pre_info_list:
+        for pre_info in pre_info_list:
+            hash_dict = {
+                'pre_hash': pre_info[0],
+                'value': pre_info[1],
+                'input_address': pre_info[2],
+            }
+            data.append(hash_dict)
 
-        # print(data)
-        return HttpResponse(json.dumps({'data': data}))
+    return HttpResponse(json.dumps({'data': data}))
 
 
 def transaction_next_query(request):
     mysqlutil = MySQL_util(mysqldb.mysql_conf)
     if request.method == 'GET':
-        get_hash = request.GET.get("hash_query")
+        get_hash = request.GET.get('txid')
         """
         向后查询
         """
         sql1 = "select bitcoin_outputs.recipient 'out_address',bitcoin_outputs.value 'out_value' from bitcoin_outputs where transaction_hash='{0}'".format(
             get_hash)
-        sql2 = "select bitcoin_outputs.recipient 'pro_outadd',bitcoin_outputs.value 'input_value',bitcoin_inputs.spending_transaction_hash 'next_hash' from bitcoin_inputs,bitcoin_outputs where bitcoin_inputs.transaction_hash=bitcoin_outputs.transaction_hash and bitcoin_outputs.index =bitcoin_inputs.index and bitcoin_outputs.transaction_hash='{0}'".format(
+        sql2 = "select bitcoin_inputs.spending_transaction_hash 'next_hash'" \
+               " from bitcoin_inputs,bitcoin_outputs where bitcoin_inputs.transaction_hash=bitcoin_outputs.transaction_hash " \
+               "and bitcoin_outputs.index =bitcoin_inputs.index and bitcoin_outputs.transaction_hash='{0}'".format(
             get_hash)
         next_info_address = mysqlutil.queryOperation(sql1)
         next_info_hash = mysqlutil.queryOperation(sql2)
+        data = []
         if next_info_hash:
-            data = []
-            for next_info in list(zip(next_info_address, next_info_hash))[0]:
-                print(next_info)
+            for next_info in list(zip(next_info_address, next_info_hash)):
                 try:
-                    next_hash = next_info[2]
+                    next_hash = next_info[1][0]
                 except:
                     next_hash = ''
                 hash_dict = {
-                    'output_address': next_info[0],
-                    'value': next_info[1],
+                    'output_address': next_info[0][0],
+                    'value': next_info[0][1],
                     'next_hash': next_hash,
-                    'hash': get_hash,
                 }
                 data.append(hash_dict)
 
-        # print(data)
         return HttpResponse(json.dumps({'data': data}))
-
-
-def transaction_search2(request):
-    mysqlutil = MySQL_util(mysqldb.mysql_conf)
-    get_hash=request.POST.get("hash_query")
-    print('写的啥代码',get_hash)
-    #get_hash = '31999c6bd7024d7c2cf04fb0bc2fe536d07d8eb7a9828c5b52229209d3727cdb'
-    sql1 = "SELECT `hash`, input_total*POWER(10,-8), output_total*POWER(10,-8),fee*POWER(10,-8), time FROM bitcoin_transactions WHERE `hash` = '{0}'".format(
-        get_hash)
-    data = []
-    total_info = mysqlutil.queryOperation(sql1)
-
-    data.append({'hash': total_info[0][0], 'input_total': total_info[0][1], 'output_total': total_info[0][2],
-                 'fee': total_info[0][3], 'time': total_info[0][4]})
-    # ({'input': input_list, 'output': output_list})
-    print(data)
-    return HttpResponse(json.dumps({'data': data}))
