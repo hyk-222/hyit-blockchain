@@ -309,6 +309,7 @@
                 let currentWidth = 0;
                 let res = str;
                 const pattern = new RegExp('[\u4E00-\u9FA5]+'); // distinguish the Chinese charactors and letters
+                if(res!==undefined){
                 str.split('').forEach((letter, i) => {
                 if (currentWidth > maxWidth - ellipsisLength) return;
                 if (pattern.test(letter)) {
@@ -322,6 +323,7 @@
                     res = `${str.substr(0, i)}${ellipsis}`;
                 }
                 });
+                }
                 return res;
             };
             // 自定义节点
@@ -414,6 +416,21 @@
                     }
                     // 普通节点
                     if (cfg.nood == 2){
+                    if(cfg.text1=='BTC-HASH'){
+                        group.addShape('rect', {
+                        attrs: {
+                        fill: '#fff',
+                        shadowColor: '#c1c1c0',//阴影颜色
+                            shadowBlur: 40,//阴影范围
+                        x: cfg.direction == '2' ? 5 : 15,
+                        y: 0,
+                        width: 170,
+                        height: 55,
+                        radius: 15,
+                        },
+                        name: 'rect-shape',
+                    });
+                    }else{
                     /* 盒子 */
                     group.addShape('rect', {
                         attrs: {
@@ -427,9 +444,9 @@
                         radius: 5,
                         },
                         name: 'rect-shape',
-                    });
+                    });}
                     /* 第一个图标 */
-                    if(!cfg.isSpread&&cfg.node==1){
+                    if(!cfg.isSpread&&cfg.node==1){                    
                         group.addShape('image', {
                         attrs: {
                         x: cfg.direction == '2' ? 13 : 23,
@@ -439,7 +456,7 @@
                         img: '../../admin/images/un.svg',
                         },
                         name: 'state-icon',
-                    })}else{
+                    })}else{                        
                         group.addShape('image', {
                         attrs: {
                         x: cfg.direction == '2' ? 13 : 23,
@@ -489,6 +506,7 @@
                         name: 'center-text-shape',
                     });
                     /* 第三行字 */
+                    if(cfg.text1!=='BTC-HASH'){
                     group.addShape('text', {
                         attrs: {
                         text: fittingString(cfg.text3, 150, 12),
@@ -501,6 +519,7 @@
                         },
                         name: 'bottom-text-shape',
                     });
+                    }
                     /* 折叠展开 */
                     if (cfg.isSpread) {
                         group.addShape('marker', {
@@ -513,7 +532,7 @@
                             fill: '#fff',
                             lineWidth: 1,
                             cursor: 'pointer', // 鼠标变手
-
+                            
                         },
                         name: 'collapse-icon',
                         });
@@ -538,7 +557,7 @@
                 },
                 },
                 'single-node',
-            );
+            );            
             const pic = document.getElementById('graph');// 获取容器id
             const parentcontent = document.getElementById('parentcontent');// 获取容器id
             const container = document.getElementById('container');// 获取容器id
@@ -647,7 +666,7 @@
                 // V —— 根节点在中间，垂直对称布局
                 direction: 'H',
                 // 判断节点向左还是向右
-                getSide: (d) => {
+                getSide: (d) => { 
                     if (d.data.direction == '2') {
                     return 'right';
                     }
@@ -679,8 +698,8 @@
             });
             //默认展示txid
             this.target = fittingString(default_txid,130,12)
-            if(!this.dataList2.children){
-                layui.loading.Load(4, "")
+            if(!this.dataList2.children){   
+                layui.loading.Load(4, "")   
                 // 初始化的图数据
                 graph.data(this.dataList)
                 layui.loading.loadRemove()
@@ -694,6 +713,7 @@
                 // 因为数据量过大,在用户点击展开时才请求获取数据
                 // 数据源里要有唯一字段 id ,不加 id g6会自动生成id,会有一些bug
                 graph.on('node:dblclick', async (e) => {
+                    const point = graph.getGraphCenterPoint();
                     const item = e.item;
                     const nodeId = item.get('id');
                     const model = item.getModel();
@@ -703,10 +723,10 @@
                     if ( model.isSpread){
                         _this.txhash= model.txhash;
                         _this.direction= model.direction;
-                        _this.spent_txid = model.spent_txid;
+                        _this.spent_txid = model.spend_txid;
                         _this.received_txid = model.received_txid;
                         _this.target = _this.received_txid
-                        await _this.getData().then(layui.loading.Load(4, ""));
+                        await _this.getData().then(layui.loading.Load(4, ""));   
                         // 不加加定时器获取不到数据
                         setTimeout(() =>{
                             graph.addChild(_this.dataList2, nodeId);
@@ -714,7 +734,7 @@
                         },200)
                         // 针对唯一id 避免多次展开
                         model.isSpread = false;
-                        this.count += 1
+                        this.count += 1        
                     }
                 });
                 graph.on('node:click',async(e)=>{
@@ -725,11 +745,9 @@
                     if(model.text1 == 'BTC-HASH'){this.type = '交易哈希号'}else{this.type = '交易地址'}
                     this.target = model.text2;
                     this.target = fittingString(model.text2,130,12);
-                    console.log(this.target)
                     this.value = model.text3;
                 })
             };
-            // graph.changeData(this._dataList2);
             const self = this
                 setTimeout(() => {
                 // todo 浏览器窗口发生变化时

@@ -13,6 +13,7 @@
         <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
         <script src="../../component/layui/layui.js"></script>
         <script src="../../component/pear/pear.js"></script>
+        <link rel="stylesheet" href="./index.css">
     </head>
     <body>
         <div id="container" class="layui-row layui-col-space12"  style="background: #eeeeee"> 
@@ -41,9 +42,8 @@
                 <div class="layui-card ">
                     <div class="layui-card-header layui-font-20 layui-font-green" >交 易 信 息</div>
                     <div class="layui-card-body" id="trans_info">
-                        <!-- {{a()}} -->
                         <ul class="list" style="height: 500px;">
-                            <li class="list-item"><span class="title layui-font-16">{{type}}<br></span><span class="footer">{{target}}</span></li><br>
+                            <li class="list-item"><span class="title layui-font-16">{{type}}<br></span><span class="footer">{{target}}</span><a class="toast-success pear-btn pear-btn-success" @click="getCopy">  复制</a></li><br>
                             <li class="list-item "><span class="title layui-font-16">输入金额</span><br><span class="footer">{{value}}</span></li><br>
                             <li class="list-item"><span class="title layui-font-16">输出金额</span><br><span class="footer">{{1}}</span></li><br>
                             <li class="list-item"><span class="title layui-font-16">手续费</span><br><span class="footer">{{1}}</span></li><br>
@@ -66,16 +66,18 @@
                 </div>
             </div>
         </div>
+
     <script> 
         //  自定义展开数量
         var storage=window.localStorage;
         var spreadNum;
-        layui.use(['element', 'jquery', 'loading', 'form','code'], function() {
+        layui.use(['element', 'jquery', 'loading', 'form','code','toast', 'layer'], function() {
                 var element = layui.element;
                 var $ = layui.jquery;
                 var loading = layui.loading;
                 var form = layui.form;
                 var layer = layui.layer;
+                var toast = layui.toast;
                 layui.form.on('select(a)', function(data){ 
                     spreadNum_now = data.value;
                     if(!window.localStorage){
@@ -91,7 +93,23 @@
                         location.reload()
                     }
                 });
+            $(".toast-success").click(function() {
+				toast.success({
+					title: 'Caution',
+					message: '已复制到粘贴板',
+					position: 'topCenter'
+				});
+			})
+            $("#collaspeSide").click(function(){
+					parent.layui.admin.collaspeSide()
+            })
+            $("#addTab").click(function(){
+					parent.layui.admin.addTab(14,"百度一下","http://www.bing.com")
+				})
             }) 
+            // $("#fullScreen").click(function(){
+			// 		parent.layui.admin.fullScreen()
+			// 	})
         var spreadNum_default=storage.getItem("spreadNum_default")
         var spreadNum_now=storage.getItem("spreadNum_now")
         var default_txid = storage.getItem("search_txid")
@@ -106,6 +124,7 @@
             count: 1,
             direction: 0,
             type:'',
+            target_copy: '',
             target: '',
             value: '',
             }
@@ -118,6 +137,7 @@
         mounted () {
             this.getData();
             this.getRoot();
+            this.getCopy();
             // this.render();
         },
         methods: {
@@ -130,7 +150,7 @@
             // 接收参数
             var tx = document.location.href.split('=');
             // const search_txid = tx[1]
-            let search_txid="f5b389e3e95f877a5125b33abf5954ffb150e18b294b714d85b0ccf0e6bc06af";
+            let search_txid="fa6a57d0666fe7224bff262b969090490a03325505f996ae40af8eca8dee3963";
             storage.setItem("search_txid",search_txid);
             
             let url1 = 'https://chain.so/api/v2/tx/BTC/' + search_txid;
@@ -283,16 +303,33 @@
                                 children:child,
                                 text1: 'BTC-HASH',
                                 text2: received_txid,
-                                text3: 'BTC',
+                                text3: '',
                                 url: "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg",};
                 this.render();
             }
+            },
+            // 一键复制
+            async getCopy () {
+                // 手动创建 textarea 标签
+                const textarea = document.createElement('textarea')
+                // 将该 textarea 设为 readonly禁止输入 防止 iOS 下自动唤起键盘，同时将 textarea 移出可视区域
+                textarea.readOnly = 'readonly'
+                textarea.style.position = 'absolute'
+                textarea.style.left = '-9999px'
+                // 将要 copy 的值赋给 textarea 标签的 value 属性
+                textarea.value = this.target_copy
+                // 将 textarea 插入到 body 中
+                document.body.appendChild(textarea)
+                // 选中值并复制
+                textarea.select()
+                document.execCommand('Copy')
+                document.body.removeChild(textarea)
+                console.log(textarea.value)
             },
             //自适应
             async render () {
             // g6 的实例方法里 this 会变
             let _this = this;
-
             // 文本超出隐藏
             // fittingString(字段, 最大长度, 字体大小)
             const fittingString = (str, maxWidth, fontSize) => {
@@ -301,6 +338,7 @@
                 let currentWidth = 0;
                 let res = str;
                 const pattern = new RegExp('[\u4E00-\u9FA5]+'); // distinguish the Chinese charactors and letters
+                if(res!==undefined){
                 str.split('').forEach((letter, i) => {
                 if (currentWidth > maxWidth - ellipsisLength) return;
                 if (pattern.test(letter)) {
@@ -314,13 +352,15 @@
                     res = `${str.substr(0, i)}${ellipsis}`;
                 }
                 });
+                }
                 return res;
             };
             // 自定义节点
             G6.registerNode(
-                'tree-node',
+                'rect',
                 {
-                drawShape: function drawShape(cfg, group) {
+                drawShape(cfg, group) {
+                    const {collapsed} = cfg;
                     const rect = group.addShape('rect', {
                     attrs: {
                         x: 0, // x 轴移动距离
@@ -335,93 +375,66 @@
                     // 主节点
                     if (cfg.nood  == 0){
                     group.addShape('rect', {
+                            attrs: {
+                                fill: '#fff',
+                                shadowColor: '#c1c1c0',//阴影颜色
+                                shadowBlur: 40,//阴影范围
+                                x: cfg.direction == '2' ? 5 : 15,
+                                y: 0,
+                                width: 170,
+                                height: 65,
+                                radius: 5,
+                            },
+                            name: 'rect-shape',
+                        });
+                        group.addShape('text', {
                         attrs: {
-                        x: 0,
-                        y: 0,
+                            // fittingString(字段, 最大长度, 字体大小)
+                            text: fittingString(this.target, 130, 12),
+                            x: cfg.direction == '2' ? 35 : 45,
+                            y: 35,
+                            fontSize: 12,
+                            textAlign: 'left',
+                            textBaseline: 'middle',
+                            fill: '#666',
                         },
-                        name: 'source-shape',
-                    });
-                    group.addShape('rect', {
-                        attrs: {
-                        fill: '#d8e5ff',
-                        x: 60,
-                        y: 0,
-                        width: 64,
-                        height: 64,
-                        radius: 35,
-                        },
-                        name: 'source-rect-shape',
-                    });
-                    group.addShape('rect', {
-                        attrs: {
-                        fill: '#2d60e0',
-                        x: 78,
-                        y: 18,
-                        width: 28,
-                        height: 28,
-                        radius: 14,
-                        },
-                        name: 'source-rect-shape',
-                    });
-                    group.addShape('text', {
-                        attrs: {
-                        fill: '#fff',
-                        text: '',
-                        x: 63,
-                        y: 90,
-                        },
-                        name: 'source-text-shape',
+                        name: 'center-text-shape',
                     });
                     }
-                    // 统计节点
-                    if (cfg.nood == 1){
-                    let operate = '';
-                    if(cfg.value3 > cfg.value2){
-                        operate= ''
-                    }else{
-                        operate= ''
-                    }
-                    /* 盒子 */
-                    group.addShape('rect', {
-                        attrs: {
-                        fill: '#eff4ff',
-                        x: 5,
-                        y: 18,
-                        width: 170,
-                        height: 30,
-                        radius: 15,
-                        },
-                        name: 'stat-rect-shape',
-                    });
-                    /* 文字 */
-                    group.addShape('text', {
-                        attrs: {
-                        fill: '#000',
-                        text: operate + cfg.value,
-                        x: 30,
-                        y: 40,
-                        },
-                        name: 'stat-text-shape',
-                    });
-                    }
-                    // 普通节点
+                    // 子节点
                     if (cfg.nood == 2){
                     /* 盒子 */
-                    group.addShape('rect', {
-                        attrs: {
-                        fill: '#fff',
-                        shadowColor: '#c1c1c0',//阴影颜色
-                            shadowBlur: 40,//阴影范围
-                        x: cfg.direction == '2' ? 5 : 15,
-                        y: 0,
-                        width: 170,
-                        height: 65,
-                        radius: 5,
-                        },
-                        name: 'rect-shape',
-                    });
+                        if(cfg.text1!=='BTC-HASH'){
+                            group.addShape('rect', {
+                                attrs: {
+                                    fill: '#fff',
+                                    shadowColor: '#c1c1c0',//阴影颜色
+                                    shadowBlur: 40,//阴影范围
+                                    x: cfg.direction == '2' ? 5 : 15,
+                                    y: 0,
+                                    width: 170,
+                                    height: 65,
+                                    radius: 5,
+                                },
+                                name: 'rect-shape',
+                            });
+                        }else {
+                            group.addShape('rect', {
+                                attrs: {
+                                    fill: '#fff',
+                                    shadowColor: '#c1c1c0',//阴影颜色
+                                    shadowBlur: 40,//阴影范围
+                                    x: cfg.direction == '2' ? 5 : 15,
+                                    y: 0,
+                                    width: 170,
+                                    height: 55,
+                                    radius: 15,
+                                },
+                                name: 'rect-shape',
+                            });
+                        }
                     /* 第一个图标 */
-                    if(!cfg.isSpread&&cfg.node==1){                    
+                    if(!cfg.isSpread&&cfg.node==1){
                         group.addShape('image', {
                         attrs: {
                         x: cfg.direction == '2' ? 13 : 23,
@@ -431,7 +444,7 @@
                         img: '../../admin/images/un.svg',
                         },
                         name: 'state-icon',
-                    })}else{                        
+                    })}else{
                         group.addShape('image', {
                         attrs: {
                         x: cfg.direction == '2' ? 13 : 23,
@@ -469,45 +482,47 @@
                     /* 第二行字 */
                     group.addShape('text', {
                         attrs: {
-                        // fittingString(字段, 最大长度, 字体大小)
-                        text: fittingString(cfg.text2, 130, 12),
-                        x: cfg.direction == '2' ? 35 : 45,
-                        y: 35,
-                        fontSize: 12,
-                        textAlign: 'left',
-                        textBaseline: 'middle',
-                        fill: '#666',
+                            // fittingString(字段, 最大长度, 字体大小)
+                            text: fittingString(cfg.text2, 130, 12),
+                            x: cfg.direction == '2' ? 35 : 45,
+                            y: 35,
+                            fontSize: 12,
+                            textAlign: 'left',
+                            textBaseline: 'middle',
+                            fill: '#666',
                         },
                         name: 'center-text-shape',
                     });
                     /* 第三行字 */
-                    group.addShape('text', {
-                        attrs: {
-                        text: fittingString(cfg.text3, 150, 12),
-                        x: cfg.direction == '2' ? 35 : 45,
-                        y: 52,
-                        fontSize: 10,
-                        textAlign: 'left',
-                        textBaseline: 'middle',
-                        fill: '#9aa1b1',
-                        },
-                        name: 'bottom-text-shape',
-                    });
+                    if(cfg.text1!=='BTC-HASH') {
+                        group.addShape('text', {
+                            attrs: {
+                                text: fittingString(cfg.text3, 150, 12),
+                                x: cfg.direction == '2' ? 35 : 45,
+                                y: 52,
+                                fontSize: 10,
+                                textAlign: 'left',
+                                textBaseline: 'middle',
+                                fill: '#9aa1b1',
+                            },
+                            name: 'bottom-text-shape',
+                        });
+                    }
                     /* 折叠展开 */
                     if (cfg.isSpread) {
-                        group.addShape('marker', {
-                        attrs: {
-                            x: cfg.direction == '2' ? 182 : 8,
-                            y: 32,
-                            r: 6,
-                            symbol: cfg.collapsed || cfg.isSpread ? G6.Marker.expand : G6.Marker.collapse,
-                            stroke: '#666',
-                            fill: '#fff',
-                            lineWidth: 1,
-                            cursor: 'pointer', // 鼠标变手
-                            
-                        },
-                        name: 'collapse-icon',
+                        group.addShape('text', {
+                            attrs: {
+                              x: cfg.direction == '2' ? 182 : 8,
+                              y: -1,
+                              textAlign: 'center',
+                              textBaseline: 'middle',
+                              text: cfg.isSpread ? '+' : '-',
+                              fontSize: 18,
+                              cursor: 'pointer',
+                              fill: 'rgba(0, 0, 0, 0.25)',
+                            },
+                            name: 'collapse-text',
+                            modelId: cfg.id,
                         });
                     }
                     }
@@ -528,13 +543,54 @@
                     }
                     }
                 },
+                // 设置状态
+                setState(name, value, item) {
+                    const group = item.getContainer()
+                    if (name === 'collapse') {
+                      const collapseText = group.find((e) => e.get('name') === 'collapse-text');
+                      if (collapseText) {
+                        if (!value) {
+                          collapseText.attr({
+                            text: '-',
+                          });
+                        } else {
+                          collapseText.attr({
+                            text: '+',
+                          });
+                        }
+                      }
+                    }
+                    if (name === 'selected') {
+                        const nodeRect = group.find((e) => e.get('name') === 'rect-shape');
+                        console.log(nodeRect)
+                        if (value) {
+                        nodeRect.attr({
+                            stroke: 'green',
+                            lineWidth: 2
+                        })
+                        } else {
+                        nodeRect.attr({
+                            stroke: '#fff',
+                            lineWidth: 1
+                        })
+                        }
+                    }
+                }
                 },
                 'single-node',
-            );            
+            );
+            const handleCollapse = (e) => {
+                const target = e.target;
+                const id = target.get('modelId');
+                const item = graph.findById(id);
+                const nodeModel = item.getModel();
+                nodeModel.collapsed = !nodeModel.collapsed;
+                graph.layout();
+                graph.setItemState(item, 'collapse', nodeModel.collapsed);
+              };
             const pic = document.getElementById('graph');// 获取容器id
             const parentcontent = document.getElementById('parentcontent');// 获取容器id
             const container = document.getElementById('container');// 获取容器id
-            const num = document.getElementById('num');// 获取容器id
             const width = _this.$refs.pic.clientWidth || 1520; // 宽
             const height = container.scrollHeight || 816; // 高
             const tooltip = new G6.Tooltip({
@@ -570,9 +626,10 @@
                     // 缩放画布；
                     'zoom-canvas',
                     'drag-node',
+                    'click-select',
                     {
                     // 只适用于树图，展开或收起子树
-                    type: 'collapse-expand',
+                    // type: 'collapse-expand',
                     // onChange：收起或展开的回调函数。警告：V3.1.2 版本中将移除
                     onChange: function onChange(item, collapsed) {
                         const data = item.get('model');
@@ -583,21 +640,21 @@
                         return true;
                     },
                     },
-                    // {
-                    //     type: 'tooltip', // 提示框
-                    //     formatText(model) {
-                    //     // 提示框文本内容
-                    //     const text =  model.text2 + '<br/> value: ' + model.text3;
-                    //     return text;
-                    //     },
-                    // },
+                    {
+                        type: 'tooltip', // 提示框
+                        formatText(model) {
+                        // 提示框文本内容
+                        const text =  model.text2 + '<br/> value: ' + model.text3;
+                        return text;
+                        },
+                    },
                 ],
                 },
                 plugins: [ toolbar],
                 // 默认状态下节点的配置，比如 type, size, color,会被写入的 data 覆盖
                 defaultNode: {
                 // 节点类型,这里是自定义节点,自己取名
-                type: 'tree-node',
+                type: 'rect',
                 // 指定边连入节点的连接点的位置（相对于该节点而言），可以为空
                 anchorPoints: [
                     [0, 0.5],
@@ -651,7 +708,7 @@
                 },
                 // 节点高度的回调函数
                 getHeight: function getHeight() {
-                    return 40;
+                    return 84;
                 },
                 // 节点宽度的回调函数
                 getWidth: function getWidth() {
@@ -663,9 +720,32 @@
                 },
                 // 节点横向间距的回调函数
                 getHGap: function getHGap() {
-                    return 100;
+                    return 130;
                 },
                 },
+                nodeStateStyles: {
+                click: {
+                    fill: 'white',  
+                    shadowOffsetX: 1,
+                    shadowOffsetY: 5,
+                    shadowColor: 'green',
+                    shadowBlur: 30,
+                    opacity: 0.5,
+                    width:180,
+                    radius: 5,
+                },
+                hover: {
+                    fill: 'white',  
+                    shadowOffsetX: 1,
+                    shadowOffsetY: 5,
+                    shadowColor: 'green',
+                    shadowBlur: 30,
+                    opacity: 0.5,
+                    width:180,
+                    radius: 5,
+                },
+            },
+                // edgeStateStyles: defaultStateStyles,
                 // 动画
                 animate: true,
             });
@@ -691,7 +771,6 @@
                     const nodeId = item.get('id');
                     const model = item.getModel();
                     const children = model.children;
-                    console.log(item);
                     // 没有子集加入数据
                     if ( model.isSpread){
                         _this.txhash= model.txhash;
@@ -716,19 +795,17 @@
                     const model = item.getModel();
                     const children = model.children;
                     if(model.text1 == 'BTC-HASH'){this.type = '交易哈希号'}else{this.type = '交易地址'}
-                    this.target = model.text2;
+                    this.target_copy = model.text2;
                     this.target = fittingString(model.text2,130,12);
                     this.value = model.text3;
                 })
             };
-            // graph.changeData(this._dataList2);
-            const self = this
-                setTimeout(() => {
+            setTimeout(() => {
                 // todo 浏览器窗口发生变化时
                 window.onresize = function () {
                 // todo 获取div parentContent 的宽度和高度
-                this.canvasWidth = self.$refs.parentContent.clientWidth
-                this.canvasHeight = self.$refs.parentContent.clientHeight
+                this.canvasWidth = _this.$refs.parentContent.clientWidth
+                this.canvasHeight = _this.$refs.parentContent.clientHeight
                 // todo 修改画布的大小
                 graph.changeSize(this.canvasWidth, this.canvasHeight)
                 // todo 将图移动到画布中心位置
@@ -736,6 +813,44 @@
                 console.log(this.canvasHeight)
                 }
             }, 20)
+            graph.on('node:mouseenter', (e) => {
+            const { item } = e;
+            graph.setItemState(item, 'hover', true);
+            });
+
+            graph.on('node:mouseleave', (e) => {
+            const { item } = e;
+            graph.setItemState(item, 'hover', false);
+            });
+            graph.on('node:click', (e) => {
+            const { item } = e;
+            // console.log('??')
+            // console.log(e)
+            graph.setItemState(item, 'hover', true);
+            });
+            graph.on('node:click', (e) => {
+                // 先将所有当前有 click 状态的节点的 click 状态置为 false
+                const clickNodes = graph.findAllByState('node', 'click');
+                clickNodes.forEach((cn) => {
+                    graph.setItemState(cn, 'click', false);
+                });
+                const nodeItem = e.item;
+                // 设置目标节点的 click 状态 为 true
+                graph.setItemState(nodeItem, 'click', true);
+            });
+            // 改变+ -
+            graph.on('collapse-text:click', (e) => {
+                handleCollapse(e);
+                const group = e.item._cfg.originStyle
+                // const collapseText = group.find((e) => e.get('name') === 'collapse-text');
+                // group.getCollection('collapse-text').find()
+                // console.log(e.item._cfg.originStyle)
+                console.log(group)
+                
+             });
+            graph.on('collapse-back:click', (e) => {
+                handleCollapse(e);
+              });
             if (typeof window !== 'undefined'){
                 window.onresize = () => {
                 if (!graph || graph.get('destroyed')) return;
@@ -749,10 +864,6 @@
             })
         storage.removeItem('spreadNum_default');
         storage.removeItem('spreadNum_now');
-    </script>
-
-    <script>
-
     </script>
     <style>
         .g6-tooltip {
