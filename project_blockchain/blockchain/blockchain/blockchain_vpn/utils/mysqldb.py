@@ -12,11 +12,11 @@ import logging
 #     'charset': 'utf8'
 # }
 mysql_conf = {
-    'host': 'localhost',
-    'user': 'root',
+    'host': '172.20.37.201',
+    'user': 'test',
     'password': '123456',
     'port': 3306,
-    'database': 'bitcoin_database',
+    'database': 'mysql_test',
     'charset': 'utf8'
 }
 

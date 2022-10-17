@@ -1,10 +1,8 @@
 # -*- coding:utf-8 -*-
 import json
-import traceback
 import urllib.request
 
 import urllib3
-import xlrd
 from django.shortcuts import render
 import re
 # Create your views here.
@@ -249,8 +247,8 @@ def recent_active_address(request):
     # if request.method == 'GET':
     #     get_hash = request.GET.get("hash_query")
     get_hash = '31999c6bd7024d7c2cf04fb0bc2fe536d07d8eb7a9828c5b52229209d3727cdb'
-    sql1 = "SELECT id, `hash`, time FROM bitcoin_test_recently ORDER BY time DESC"
-         # sql1 = "SELECT id, `hash`, time FROM bitcoin_test_recently WHERE `hash` = '{0}'".format(get_hash)
+    sql1 = "SELECT id, `hash`, time FROM bitcoin_test_recently ORDER BY time DESC".format(
+        get_hash)  # sql1 = "SELECT id, `hash`, time FROM bitcoin_test_recently WHERE `hash` = '{0}'".format(get_hash)
     data = []
     total_info = mysqlutil.queryOperation(sql1)
 
@@ -260,7 +258,3 @@ def recent_active_address(request):
     print(data)
     return HttpResponse(
         json.dumps({'code': 0, 'msg': '', 'count': len(total_info), 'data': data}))  # 'count': len(total_info),
-
-
-
-

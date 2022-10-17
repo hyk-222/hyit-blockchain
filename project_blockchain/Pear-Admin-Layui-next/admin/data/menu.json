@@ -102,13 +102,13 @@
 	},
 	{
 		"id": "VPN_DC",
-		"title": "虚拟币使用记录",
+		"title": "虚拟币应用使用记录",
 		"icon": "layui-icon layui-icon-util",
 		"type": 0,
 		"href": "",
 		"children":[{
 			"id": 1301,
-			"title": "淮安",
+			"title": "四码信息表",
 			"icon":"layui-icon layui-icon-util",
 			"type": 1,
 			"openType":"_iframe",
@@ -116,7 +116,7 @@
 		},
 		{
 			"id": 13102,
-			"title": "全国",
+			"title": "合并信息",
 			"icon":"layui-icon layui-icon-util",
 			"type": 1,
 			"openType":"_iframe",

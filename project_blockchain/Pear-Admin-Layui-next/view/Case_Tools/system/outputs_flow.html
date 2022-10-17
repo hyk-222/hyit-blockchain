@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+
+		<title>地址标注</title>
+		<link rel="stylesheet" href="../../../component/pear/css/pear.css" />
+	</head>
+
+	<body class="pear-container">
+		<div class="layui-card">
+			<div class="layui-card-body">
+				<form class="layui-form" action="">
+					<div class="layui-form-item">
+						<!-- <label class="layui-form-label">用户名</label>
+						<div class="layui-input-inline">
+							<input type="text" name="realName" placeholder="" class="layui-input">
+						</div> -->
+						<label class="layui-form-label">地址/标注</label>
+						<div class="layui-input-inline">
+							<input type="text" name="username" placeholder="" class="layui-input">
+						</div>
+						<button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="user-query">
+							<i class="layui-icon layui-icon-search"></i>
+							查询
+						</button>
+						<button type="reset" class="pear-btn pear-btn-md">
+							<i class="layui-icon layui-icon-refresh"></i>
+							重置
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+		<div class="layui-card">
+			<div class="layui-card-body">
+				<table id="user-table" lay-filter="user-table"></table>
+			</div>
+		</div>
+
+<!--		<script type="text/html" id="user-toolbar">-->
+<!--			<button class="pear-btn pear-btn-primary pear-btn-md" lay-event="add">-->
+<!--				<i class="layui-icon layui-icon-add-1"></i>-->
+<!--				录入-->
+<!--			</button>-->
+<!--			<button class="pear-btn pear-btn-danger pear-btn-md" lay-event="batchRemove">-->
+<!--				<i class="layui-icon layui-icon-delete"></i>-->
+<!--				删除-->
+<!--			</button>-->
+<!--		</script>-->
+
+<!--		<script type="text/html" id="user-bar">-->
+<!--			<button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="edit"><i-->
+<!--					class="layui-icon layui-icon-edit"></i></button>-->
+<!--			<button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove"><i-->
+<!--					class="layui-icon layui-icon-delete"></i></button>-->
+<!--			<button class="pear-btn pear-btn-sm" id="more_{{d.userId}}"><i class="layui-icon layui-icon-triangle-d"></i></button>-->
+<!--		</script>-->
+
+		<script type="text/html" id="user-enable">
+			<input type="checkbox" name="enable" value="{{d.id}}" lay-skin="switch" lay-text="启用|禁用" lay-filter="user-enable"
+				checked="{{ d.enable == 0 ? 'true' : 'false' }}">
+		</script>
+
+		<script type="text/html" id="user-sex">
+		{{#if (d.sex == 1) { }}
+			<span>男</span>
+			{{# }else if(d.sex == 2){ }}
+				<span>女</span>
+				{{# } }}
+		</script>
+
+		<script type="text/html" id="user-login">
+		{{#if (d.login == 0) { }}
+			<span>在线</span>
+			{{# }else if(d.sex == 1){ }}
+				<span>离线</span>
+				{{# } }}
+		</script>
+
+		<script type="text/html" id="user-createTime">
+		{{layui.util.toDateString(d.createTime, 'yyyy-MM-dd')}}
+		</script>
+
+		<!-- <div style="display: none;">
+			<div class="layer-top">
+				<br />
+				<h3>上侧弹层内容...</h3>
+			</div>
+		</div> -->
+
+		<script src="../../../component/layui/layui.js"></script>
+		<script src="../../../component/pear/pear.js"></script>
+		<script>
+			layui.use(['table', 'form', 'jquery', 'drawer', 'dropdown', 'treetable'], function() {
+				let table = layui.table;
+				let form = layui.form;
+				let $ = layui.jquery;
+				let drawer = layui.drawer;
+				let dropdown = layui.dropdown;
+                let treetable = layui.treetable;
+
+				let MODULE_PATH = "/system/user/";
+				let MODULE_PATH2 = "../../system/operate/";
+
+				let cols = [
+					[{
+							type: 'checkbox'
+						},
+						{
+							title: '统计地址',
+							field: '统计地址',
+							align: 'center',
+							width: 100
+						},
+						{
+							title: 'TXID',
+							field: 'TXID',
+							align: 'center'
+						},
+
+						{
+							title: '流出时间',
+							field: '流出时间',
+							align: 'center',
+							templet: 'center'
+						},
+						{
+							title: '流出金额',
+							field: '流出金额',
+							align: 'center',
+							templet: 'center'
+						},
+							{
+							title: '接收方地址',
+							field: '接收方地址',
+							align: 'center'
+						},
+						{
+							title: '接收金额',
+							field: '接收金额',
+							align: 'center',
+							templet: 'center'
+						},
+						// {
+						// 	title: '操作',
+						// 	toolbar: '#user-bar',
+						// 	align: 'left',
+						// 	width: 160,
+						// 	fixed: 'right'
+						// }
+					]
+				]
+
+
+				function getQueryString(name) {
+				const reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i')
+				const url = window.location.href
+				const search = url.substring(url.lastIndexOf('?') + 1)
+				const r = search.match(reg)
+				if (r != null) return decodeURI(r[2])
+				return null
+			}
+
+			    dictType = getQueryString('trade_direction');
+				console.log('试一试',dictType)
+				d=unescape(getQueryString("trade_direction"));
+				console.log('试一试',d)
+				table.render({
+					elem: '#user-table',
+					url: 'http://127.0.0.1:8000/to_view',
+					page: true,
+					dataType: 'json',
+					type:'POST',
+					where: {"create_time":getQueryString('create_time'),"trade_direction":getQueryString('trade_direction')},
+				    limit:10,
+				    limits:[10,20,30,40,50],
+					cols: cols,
+					skin: 'line',
+					toolbar: '#user-toolbar',
+					defaultToolbar: [{
+						layEvent: 'refresh',
+						icon: 'layui-icon-refresh',
+					}, 'filter', 'print', 'exports'],
+					done: function(res, curr, count) {
+						for (var i = 0; i < res.data.length; i++) {
+							dropdown.render({
+								elem: '#more_' + res.data[i].userId,
+								data: [{
+									title: 'menu item11',
+									id: 100
+								}, {
+									title: 'menu item22',
+									id: 101
+								}, {
+									title: 'menu item33',
+									id: 102
+								}],
+								id: '#more_' + res.data[i].userId,
+								click: function(obj) {
+									layer.tips('点击了：' + obj.title, this.elem, {
+										tips: [1, '#5FB878']
+									})
+								}
+							});
+						}
+					}
+				});
+
+				table.on('tool(user-table)', function(obj) {
+					if (obj.event === 'remove') {
+						window.remove(obj);
+					} else if (obj.event === 'edit') {
+						window.edit(obj);
+					}
+					//   else if(obj.event === 'expandAll'){
+				    //     treetable.expandAll("#power-table");
+			        // } else if(obj.event === 'foldAll'){
+				    //     treetable.foldAll("#power-table");
+			        // } else if(obj.event === 'reload'){
+				    //     treetable.reload("#power-table");
+			        // }
+				});
+
+				table.on('toolbar(user-table)', function(obj) {
+					if (obj.event === 'add') {
+						window.add();
+					} else if (obj.event === 'refresh') {
+						window.refresh();
+					} else if (obj.event === 'batchRemove') {
+						window.batchRemove(obj);
+					} else if(obj.event === 'expandAll'){
+				        treetable.expandAll("#user-table");
+			        } else if(obj.event === 'foldAll'){
+				        treetable.foldAll("#user-table");
+			        } else if(obj.event === 'reload'){
+				        treetable.reload("#user-table");
+			        }
+
+				});
+
+				form.on('submit(user-query)', function(data) {
+					table.reload('user-table', {
+						where: data.field
+					})
+                    var keyword = data.field.keyword;
+                    treetable.search('#user-table',keyword);
+					return false;
+				});
+
+                // form.on('submit(power-query)', function(data) {
+                //     var keyword = data.field.keyword;
+                //     treetable.search('#user-table',keyword);
+                //     return false;
+		        // });
+
+				form.on('switch(user-enable)', function(obj) {
+					layer.tips(this.value + ' ' + this.name + '：' + obj.elem.checked, obj.othis);
+				});
+
+				window.add = function() {
+					layer.open({
+                		type: 2,
+                		title: '录入',
+                		shade: 0.1,
+                		area: ['450px', '320px'],
+                		content: MODULE_PATH2 + 'add_addr_tag.html'
+            		});
+				}
+
+				window.edit = function(obj) {
+					layer.msg("修改");
+				}
+
+				window.remove = function(obj) {
+					layer.confirm('确定要删除该用户', {
+						icon: 3,
+						title: '提示'
+					}, function(index) {
+						layer.close(index);
+						let loading = layer.load();
+						$.ajax({
+							url: MODULE_PATH + "remove/" + obj.data['userId'],
+							dataType: 'json',
+							type: 'delete',
+							success: function(result) {
+								layer.close(loading);
+								if (result.success) {
+									layer.msg(result.msg, {
+										icon: 1,
+										time: 1000
+									}, function() {
+										obj.del();
+									});
+								} else {
+									layer.msg(result.msg, {
+										icon: 2,
+										time: 1000
+									});
+								}
+							}
+						})
+					});
+				}
+
+				window.batchRemove = function(obj) {
+					let data = table.checkStatus(obj.config.id).data;
+					if (data.length === 0) {
+						layer.msg("未选中数据", {
+							icon: 3,
+							time: 1000
+						});
+						return false;
+					}
+					let ids = "";
+					for (let i = 0; i < data.length; i++) {
+						ids += data[i].userId + ",";
+					}
+					ids = ids.substr(0, ids.length - 1);
+					layer.confirm('确定要删除这些用户', {
+						icon: 3,
+						title: '提示'
+					}, function(index) {
+						layer.close(index);
+						let loading = layer.load();
+						$.ajax({
+							url: MODULE_PATH + "batchRemove/" + ids,
+							dataType: 'json',
+							type: 'delete',
+							success: function(result) {
+								layer.close(loading);
+								if (result.success) {
+									layer.msg(result.msg, {
+										icon: 1,
+										time: 1000
+									}, function() {
+										table.reload('user-table');
+									});
+								} else {
+									layer.msg(result.msg, {
+										icon: 2,
+										time: 1000
+									});
+								}
+							}
+						})
+					});
+				}
+
+				window.refresh = function(param) {
+					table.reload('user-table');
+				}
+			})
+		</script>
+	</body>
+</html>

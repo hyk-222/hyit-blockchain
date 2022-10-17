@@ -101,20 +101,6 @@
 		}]
 	},
 	{
-		"id": "VPN_DC",
-		"title": "淮安VPN+虚拟币使用记录",
-		"icon": "layui-icon layui-icon-util",
-		"type": 1,
-		"href": "view/VPN_DC/index.html"
-	},
-	{
-		"id": "VPN_DC2",
-		"title": "全国VPN+虚拟币使用记录",
-		"icon": "layui-icon layui-icon-util",
-		"type": 1,
-		"href": "view/VPN_DC2/index.html"
-	},
-	{
 		"id": "Data_Screen",
 		"title": "数据大屏幕",
 		"icon": "layui-icon layui-icon-util",

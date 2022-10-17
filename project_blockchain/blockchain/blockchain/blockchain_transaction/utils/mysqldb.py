@@ -4,13 +4,21 @@
 import pymysql
 import logging
 mysql_conf = {
-    'host': '172.16.2.123',
+    'host': '172.20.37.201',
     'user': 'test',
     'password': '123456',
     'port': 3306,
-    'database': 'bitcoin_data',
+    'database': 'mysql_test',
     'charset': 'utf8'
 }
+# mysql_conf = {
+#     'host': '172.16.2.123',
+#     'user': 'test',
+#     'password': '123456',
+#     'port': 3306,
+#     'database': 'mysql_test',
+#     'charset': 'utf8'
+# }
 
 
 '''mysql工具类'''

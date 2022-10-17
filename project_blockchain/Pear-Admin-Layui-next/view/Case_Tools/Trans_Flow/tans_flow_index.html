@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>交易流水查询</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../../../component/pear/css/pear.css" />
+    <link rel="stylesheet" href="../../../admin/css/query.css">
+    <link href="https://cdnjs.loli.net/ajax/libs/font-awesome/5.8.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="pear-container">
+<!--    <div class="con">-->
+        <div class="layui-card layui-form" lay-filter="component-form-element">
+            <div class="layui-form-item">
+                    <label class="layui-form-label"></label>
+                    <div class="layui-input-block">
+                    </div>
+            </div>
+            <form class="t1" action="" onsubmit="return false">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">币种</label>
+                    <div class="layui-col-md6">
+                        <select name="currency_type" lay-verify="required" lay-search>
+                            <option value=""></option>
+                            <option value="0">比特币(BTC)</option>
+                            <option value="1">以太坊(ETH)</option>
+                            <option value="2">泰达币(USDT)</option>
+<!--                            <option value="3">狗狗币(Doge)</option>-->
+<!--                            <option value="4">莱特币()</option>-->
+                        </select>
+                    </div>
+                </div>
+<!--                <form class="layui-form">-->
+                <div class="layui-form-item">
+                    <label class="layui-form-label">地址</label>
+                    <div class="layui-input-block" style="width: 50%;">
+                        <input type="text" name="address" required  lay-verify="required" placeholder="请输入虚拟货币地址"  class="layui-input" >
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">时间范围</label>
+                    <div class="layui-input-block">
+                        <input type="radio" name='time_lable' lay-filter="time_lable" value="0" title="近七天" {if $rs.type==0}checked{/if} checked>
+                        <input type="radio" name="time_lable" lay-filter="time_lable" value="1" title="近30天" {if $rs.type==1}checked{/if} >
+                        <input type="radio" name="time_lable" lay-filter="time_lable" value="2" title="近半年" {if $rs.type==2}checked{/if} >
+                        <input type="radio" name="time_lable" lay-filter="time_lable" value="3" title="近一年" {if $rs.type==3}checked{/if} >
+                        <input type="radio" name="time_lable" lay-filter="time_lable" value="4" title="自定义" {if $rs.type==4}checked{/if} >
+                    </div>
+                </div>
+                	<div class="layui-inline" name='data_show'  id="data_show" style="display: none;">
+					 <label class="layui-form-label" >请选择日期范围</label>
+						  <div class="layui-inline" id="test6">
+							<div class="layui-input-inline">
+							  <input type="text" name="start_time" autocomplete="" id="test-startDate-1" class="layui-input" placeholder="开始日期" value="2022-01-01">
+							</div>
+							<div class="layui-form-mid" style="display: none;">-</div>
+							<div class="layui-input-inline">
+							  <input type="text" name="end_time" autocomplete="" id="test-endDate-1" class="layui-input" placeholder="结束日期" value="2023-01-01">
+							</div>
+						  </div>
+					</div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">交易方向</label>
+                    <div class="layui-input-block">
+                        <input type="radio" name="direction_lable" lay-filter="direction_lable" value="0" title="流入" {if $rs.type==0}checked{/if} checked>
+                        <input type="radio" name="direction_lable" lay-filter="direction_lable" value="1" title="流出" {if $rs.type==1}checked{/if}>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">额度</label>
+                    <div class="layui-input-block">
+                        <input type="radio" name="value_lable" lay-filter="value_lable" value="0" title="不限"  {if $rs.type==0}checked{/if} checked>
+                        <input type="radio" name="value_lable" lay-filter="value_lable" value="1" title="大于"  {if $rs.type==1}checked{/if}>
+<!--                        <div class="layui-input-block-mid" >-</div>-->
+                        <input type="radio" name="value_lable" lay-filter="value_lable" value="2" title="小于"  {if $rs.type==2}checked{/if}>
+                        <input type="radio" name="value_lable" lay-filter="value_lable" value="3" title="介于"  {if $rs.type==3}checked{/if}>
+                        </div>
+                </div>
+
+                <div class="layui-form-item">
+                <label class="layui-form-label" id="high_value_1" style="display: none;">输入最小值</label>
+                <div class="layui-input-inline" id="high_value_2" style="display: none;">
+                  <input type="text" name="low_value" lay-verify="required" placeholder="请输入最小值" value='0' autocomplete="off" class="layui-input">
+                </div>
+                 <label class="layui-form-label" id="high_value_3" style="display: none;">BTC</label>
+                 <div class="layui-form-item">
+                <label class="layui-form-label" id="low_value_1" style="display: none;">输入最大值</label>
+                <div class="layui-input-inline" id="low_value_2" style="display: none;">
+                  <input type="text" name="high_value" lay-verify="required" placeholder="请输入最大值" value='100000' autocomplete="off" class="layui-input">
+                </div>
+                 <label class="layui-form-label" id="low_value_3" style="display: none;">BTC</label>
+                 </div>
+                </div>
+
+<!--                  <div class="layui-form-item">-->
+<!--                <label class="layui-form-label" id="two_value_1" style="display: none;">请输入最大值</label>-->
+<!--                <div class="layui-input-inline" id="two_value_2" style="display: none;">-->
+<!--                    <input type="text" name="low_value" id="low_value" lay-verify="required" placeholder="请输入最大值" autocomplete="off" class="layui-input">-->
+<!--                <label class="layui-form-label" id="two_value_3" style="display: none;">请输入最小值</label>-->
+<!--                  <input type="text" name="high_value" id="high_value" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input">-->
+<!--                </div>-->
+
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                      <button type="button" class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="user-query">
+							<i class="layui-icon layui-icon-search"></i>
+							导出
+						</button>
+                       <button type="reset" name="reset_sumit" id="reset_sumit" lay-filter="reset_sumit" class="layui-btn layui-btn-primary">清空条件</button>
+                    </div>
+                </div>
+            </form>
+            <div class="layui-form-item">
+                <label class="layui-form-label"></label>
+                <div class="layui-input-block">
+                </div>
+            </div>
+        </div>
+        <div class="layui-card-body">
+            <table id="user-table" lay-filter="user-table"></table>
+        </div>
+
+
+
+<!--		<script type="text/html" id="user-toolbar">-->
+<!--			<button class="pear-btn pear-btn-primary pear-btn-md" lay-event="add">-->
+<!--				<i class="layui-icon layui-icon-add-1"></i>-->
+<!--				新增-->
+<!--			</button>-->
+<!--			<button class="pear-btn pear-btn-danger pear-btn-md" lay-event="batchRemove">-->
+<!--				<i class="layui-icon layui-icon-delete"></i>-->
+<!--				删除-->
+<!--			</button>-->
+<!--		</script>-->
+
+		<script type="text/html" id="user-bar">
+			<button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="edit"><i
+					class="layui-icon layui-icon-search"></i>查看</button>
+<!--        <button type="button" class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="user-query">-->
+<!--							<i class="layui-icon layui-icon-search"></i>-->
+<!--							查看-->
+<!--						</button>-->
+			<button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove"><i
+					class="layui-icon layui-icon-delete"></i></button>
+			<button class="pear-btn pear-btn-sm" id="more_{{d.userId}}"><i class="layui-icon layui-icon-triangle-d"></i></button>
+		</script>
+
+		<script type="text/html" id="user-enable">
+			<input type="checkbox" name="enable" value="{{d.id}}" lay-skin="switch" lay-text="启用|禁用" lay-filter="user-enable"
+				checked="{{ d.enable == 0 ? 'true' : 'false' }}">
+		</script>
+
+		<script type="text/html" id="user-sex">
+		{{#if (d.sex == 1) { }}
+			<span>男</span>
+			{{# }else if(d.sex == 2){ }}
+				<span>女</span>
+				{{# } }}
+		</script>
+
+		<script type="text/html" id="user-login">
+		{{#if (d.login == 0) { }}
+			<span>在线</span>
+			{{# }else if(d.sex == 1){ }}
+				<span>离线</span>
+				{{# } }}
+		</script>
+
+		<script type="text/html" id="user-createTime">
+		{{layui.util.toDateString(d.createTime, 'yyyy-MM-dd')}}
+		</script>
+
+		<div style="display: none;">
+			<div class="layer-top">
+				<br />
+				<h3>上侧弹层内容...</h3>
+			</div>
+		</div>
+
+		<script src="../../../component/layui/layui.js"></script>
+		<script src="../../../component/pear/pear.js"></script>
+		<script>
+			layui.use(['table', 'form', 'jquery', 'drawer', 'dropdown'], function() {
+				let table = layui.table;
+				let form = layui.form;
+				let $ = layui.jquery;
+				let drawer = layui.drawer;
+				let dropdown = layui.dropdown;
+                var laydate = layui.laydate;//时间
+				let MODULE_PATH = "../system/";
+
+
+				let cols = [
+					[{
+							type: 'checkbox'
+						},
+						{
+							title: '币种',
+							field: 'currency_type',
+							align: 'center',
+							width: 100
+						},
+						{
+							title: '地址',
+							field: 'address',
+							align: 'center',
+							width: 280,
+
+						},
+						{
+							title: '时间范围',
+							field: 'time_range',
+							align: 'center'
+						},
+                        {
+							title: '金额范围(BTC)',
+							field: 'amount_range',
+							align: 'center'
+						},
+<!--						{-->
+<!--							title: '启用',-->
+<!--							field: 'enable',-->
+<!--							align: 'center',-->
+<!--							templet: '#user-enable'-->
+<!--						},-->
+						{
+							title: '交易方向',
+							field: 'trade_direction',
+							align: 'center',
+						},
+                        {
+							title: '统计总数',
+							field: 'record_number',
+							align: 'center',
+							templet: 'center',
+						},
+						{
+							title: '创建时间',
+							field: 'create_time',
+							align: 'center',
+							templet: 'center'
+						},
+                        {
+							title: '创建人',
+							field: 'create_people',
+							align: 'center',
+							templet: 'center',
+						},
+
+						{
+							title: '操作',
+							toolbar: '#user-bar',
+							align: 'left',
+							width: 160,
+							fixed: 'right'
+						}
+					]
+				]
+
+				table.render({
+					elem: '#user-table',
+					url: 'http://127.0.0.1:8000/flow_show',
+					page: true,
+				    limit:5,
+				    limits:[5,10,15,50,100],
+					cols: cols,
+					skin: 'line',
+					toolbar: '#user-toolbar',
+					defaultToolbar: [{
+						layEvent: 'refresh',
+						icon: 'layui-icon-refresh',
+					}, 'filter', 'print', 'exports'],
+					done: function(res, curr, count) {
+						for (var i = 0; i < res.data.length; i++) {
+							dropdown.render({
+								elem: '#more_' + res.data[i].userId,
+								data: [{
+									title: 'menu item11',
+									id: 100
+								}, {
+									title: 'menu item22',
+									id: 101
+								}, {
+									title: 'menu item33',
+									id: 102
+								}],
+								id: '#more_' + res.data[i].userId,
+								click: function(obj) {
+									layer.tips('点击了：' + obj.title, this.elem, {
+										tips: [1, '#5FB878']
+									})
+								}
+							});
+						}
+					}
+				});
+
+				table.on('tool(user-table)', function(obj) {
+					if (obj.event === 'remove') {
+						window.remove(obj);
+					} else if (obj.event === 'edit') {
+						window.edit(obj);
+
+					}
+				});
+
+                form.on('radio(time_lable)', function(data){
+                 console.log(data.value); //被点击的radio的value值
+
+                  if(data.value == '0'){
+                    $("#data_show").hide();
+                  }else if(data.value == '1'){
+                     $("#data_show").hide();
+                  }else if(data.value == '2'){
+                     $("#data_show").hide();
+                  }else if(data.value == '3'){
+                     $("#data_show").hide();
+                  }else if(data.value == '4'){
+                    $("#data_show").show();
+                  }
+              });
+                laydate.render({
+				elem: '#test6'
+				//设置开始日期、日期日期的 input 选择器
+				//数组格式为 2.6.6 开始新增，之前版本直接配置 true 或任意分割字符即可
+				,range: ['#test-startDate-1', '#test-endDate-1']
+			  });
+                form.on('radio(value_lable)', function(data){
+                 console.log(data.value); //被点击的radio的value值
+
+                  if(data.value == '0'){
+                    $("#high_value_1").hide();
+                    $("#high_value_2").hide();
+                    $("#high_value_3").hide();
+                    $("#low_value_1").hide();
+                    $("#low_value_2").hide();
+                    $("#low_value_3").hide();
+
+                  }else if(data.value == '1'){
+                    $("#high_value_1").show();
+                    $("#high_value_2").show();
+                    $("#high_value_3").show();
+                    $("#low_value_1").hide();
+                    $("#low_value_2").hide();
+                    $("#low_value_3").hide();
+
+                  }else if(data.value == '2'){
+                    $("#high_value_1").hide();
+                    $("#high_value_2").hide();
+                    $("#high_value_3").hide();
+                    $("#low_value_1").show();
+                    $("#low_value_2").show();
+                    $("#low_value_3").show();
+
+                  }else if(data.value == '3'){
+                    $("#high_value_1").show();
+                    $("#high_value_2").show();
+                    $("#high_value_3").show();
+                    $("#low_value_1").show();
+                    $("#low_value_2").show();
+                     $("#low_value_3").show();
+
+
+                  }
+              });
+
+				table.on('toolbar(user-table)', function(obj) {
+					if (obj.event === 'add') {
+						window.add();
+					} else if (obj.event === 'refresh') {
+						window.refresh();
+					} else if (obj.event === 'batchRemove') {
+						window.batchRemove(obj);
+					}
+				});
+                // 监听搜索操作，查询
+
+				form.on('submit(user-query)', function(data) {
+				    console.log(data)
+					$.ajax({
+							url:"http://127.0.0.1:8000/expore_file",
+                            data: JSON.stringify(data.field),
+							dataType: 'json',
+						    type: 'post',
+							success: function(result) {
+								console.log(result)
+								if (result.success) {
+								    if(result.code==0){
+								        layer.msg(result.msg, {
+										icon: 1,
+										time: 1000
+                                       },  function() {
+										location.reload();
+									});
+                                    }else{
+                                        layer.msg(result.msg, {
+										icon: 1,
+										time: 1000
+                                       },  function() {
+										location.reload();
+									});
+                                        }
+									// layer.msg(result.msg+'删除成功！', {
+									// 	icon: 1,
+									// 	time: 1000
+									// }, function() {
+									// 	obj.del();
+									// });
+								} else {
+									layer.msg(result.msg, {
+										icon: 2,
+										time: 1000
+									});
+								}
+							}
+						})
+					return false;
+				});
+
+
+				window.edit = function(obj) {
+				    var layer=layui.layer;
+				    var data = obj.data;       // 获得当前行数据
+				    var layEvent = obj.event; // 获得 lay-event 对应的值（也可以是表头的event 参数对应的值）
+				    var tr = obj.tr;
+				    console.log(data)
+				    var jsonData = JSON.stringify(data);
+
+                    //form.render("radio");
+                    if (data.trade_direction=='流入')
+                    {
+                         layer.open({
+                            type: 2,
+                            title: '流入详情',
+                            area: ['85%', '80%'],
+                            shadeClose: true,
+                            shade: 0.6,
+                            maxmin: true,
+                            //这里进行页面的跳转，并在跳转时进行传参，传参方式用?拼接的方式
+                           content: MODULE_PATH + 'inputs_flow.html?create_time='+data.create_time+'&trade_direction='+data.trade_direction,
+                           success: function(layero, index){
+                                // var iframe = window['edit'+index];
+                                // // 向子页面的全局函数child传参
+                                // console.log(data)
+                                // iframe.child(data);
+
+                        }
+                    });
+                    }
+                    else if(data.trade_direction=='流出'){
+                        layer.open({
+                            type: 2,
+                            title: '流出详情',
+                            area: ['85%', '80%'],
+                            shadeClose: true,
+                            shade: 0.6,
+                            maxmin: true,
+                            //这里进行页面的跳转，并在跳转时进行传参，传参方式用?拼接的方式
+                           content: MODULE_PATH + 'outputs_flow.html?create_time='+data.create_time+'&trade_direction='+data.trade_direction,
+                           success: function(layero, index){
+                                // var iframe = window['edit'+index];
+                                // // 向子页面的全局函数child传参
+                                // console.log(data)
+                                // iframe.child(data);
+
+                        }
+                    });
+
+                    }
+
+				}
+
+				window.remove = function(obj) {
+					layer.confirm('确定要删除该记录', {
+						icon: 3,
+						title: '提示'
+					}, function(index) {
+						layer.close(index);
+						let loading = layer.load();
+						$.ajax({
+							url:"http://127.0.0.1:8000/delete_records",
+                            data: {'create_time':obj.data['create_time']},
+							dataType: 'json',
+						    type: 'post',
+							success: function(result) {
+								layer.close(loading);
+								if (result.success) {
+									layer.msg(result.msg+'删除成功！', {
+										icon: 1,
+										time: 1000
+									}, function() {
+										obj.del();
+									});
+								} else {
+									layer.msg(result.msg, {
+										icon: 2,
+										time: 1000
+									});
+								}
+							}
+						})
+					});
+				}
+
+				window.batchRemove = function(obj) {
+					let data = table.checkStatus(obj.config.id).data;
+					if (data.length === 0) {
+						layer.msg("未选中数据", {
+							icon: 3,
+							time: 1000
+						});
+						return false;
+					}
+					let ids = "";
+					for (let i = 0; i < data.length; i++) {
+						ids += data[i].userId + ",";
+					}
+					ids = ids.substr(0, ids.length - 1);
+					layer.confirm('确定要删除这些用户', {
+						icon: 3,
+						title: '提示'
+					}, function(index) {
+						layer.close(index);
+						let loading = layer.load();
+						$.ajax({
+							url: MODULE_PATH + "batchRemove/" + ids,
+							dataType: 'json',
+							type: 'delete',
+							success: function(result) {
+								layer.close(loading);
+								if (result.success) {
+									layer.msg(result.msg, {
+										icon: 1,
+										time: 1000
+									}, function() {
+										table.reload('user-table');
+									});
+								} else {
+									layer.msg(result.msg, {
+										icon: 2,
+										time: 1000
+									});
+								}
+							}
+						})
+					});
+				}
+
+				window.refresh = function(param) {
+					table.reload('user-table');
+				}
+			})
+		</script>
+
+
+
+
+
+<!--    </div>-->
+		<!-- <script type="text/html" id="organization-toolbar">
+			<button class="pear-btn pear-btn-primary pear-btn-md" lay-event="add">
+				<i class="layui-icon layui-icon-add-1"></i>新增
+			</button>
+			<button class="pear-btn pear-btn-danger pear-btn-md" lay-event="batchRemove">
+				<i class="layui-icon layui-icon-delete"></i>删除
+			</button>
+		</script>
+
+		<script type="text/html" id="organization-bar">
+			<button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="edit">
+				<i class="layui-icon layui-icon-edit"></i></button>
+			<button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove">
+				<i class="layui-icon layui-icon-delete"></i></button>
+		</script>
+		<script src="../../component/layui/layui.js"></script>
+		<script src="../../component/pear/pear.js"></script>
+		<script>
+			layui.use(['table', 'form', 'jquery', 'drawer', 'dropdown'], function() {
+				let table = layui.table;
+				let form = layui.form;
+				let $ = layui.jquery;
+				let drawer = layui.drawer;
+				let dropdown = layui.dropdown;
+
+				let MODULE_PATH = "/system/user/";
+
+				let cols = [
+					[{
+							type: 'checkbox'
+						},
+						{
+							title: '币种',
+							field: 'username',
+							align: 'center',
+							width: 100
+						},
+						{
+							title: '地址',
+							field: 'realName',
+							align: 'center'
+						},
+						{
+							title: '时间范围',
+							field: 'sex',
+							align: 'center',
+							width: 80,
+							templet: '#user-sex'
+						},
+						{
+							title: '状态',
+							field: 'phone',
+							align: 'center'
+						},
+						{
+							title: '创建时间',
+							field: 'enable',
+							align: 'center',
+							templet: '#user-enable'
+						},
+<!--						{-->
+<!--							title: '其他',-->
+<!--							field: 'login',-->
+<!--							align: 'center',-->
+<!--							templet: '#user-login'-->
+<!--						},-->
+<!--						{-->
+<!--							title: '注册',-->
+<!--							field: 'createTime',-->
+<!--							align: 'center',-->
+<!--							templet: '#user-createTime'-->
+<!--						},-->
+						<!-- {
+							title: '操作',
+							toolbar: '#user-bar',
+							align: 'left',
+							width: 160,
+							fixed: 'right'
+						}
+					]
+				]
+
+				// var DTree = dtree.render({
+				// 	elem: "#organizationTree",
+				// 	//data: data,
+				// 	initLevel: "2", //默认展开层级为1
+				// 	line: true, // 有线树
+				// 	ficon: ["1", "-1"], // 设定一级图标样式。0表示方形加减图标，8表示小圆点图标
+				// 	icon: ["0", "2"], // 设定二级图标样式。0表示文件夹图标，5表示叶子图标
+				// 	method: 'get',
+				// 	url: "../../admin/data/organizationtree.json"
+				// });
+
+				table.render({
+					elem: '#user-table',
+					url: '../../admin/data/table.json',
+					page: true,
+					cols: cols,
+					skin: 'line',
+					toolbar: '#user-toolbar',
+					defaultToolbar: [{
+						layEvent: 'refresh',
+						icon: 'layui-icon-refresh',
+					}, 'filter', 'print', 'exports'],
+					done: function(res, curr, count) {
+						for (var i = 0; i < res.data.length; i++) {
+							dropdown.render({
+								elem: '#more_' + res.data[i].userId,
+								data: [{
+									title: 'menu item11',
+									id: 100
+								}, {
+									title: 'menu item22',
+									id: 101
+								}, {
+									title: 'menu item33',
+									id: 102
+								}],
+								id: '#more_' + res.data[i].userId,
+								click: function(obj) {
+									layer.tips('点击了：' + obj.title, this.elem, {
+										tips: [1, '#5FB878']
+									})
+								}
+							});
+						}
+					}
+				});
+
+				table.on('tool(user-table)', function(obj) {
+					if (obj.event === 'remove') {
+						window.remove(obj);
+					} else if (obj.event === 'edit') {
+						window.edit(obj);
+					}
+				});
+
+				table.on('toolbar(user-table)', function(obj) {
+					if (obj.event === 'add') {
+						window.add();
+					} else if (obj.event === 'refresh') {
+						window.refresh();
+					} else if (obj.event === 'batchRemove') {
+						window.batchRemove(obj);
+					}
+				});
+
+				form.on('submit(user-query)', function(data) {
+					table.reload('user-table', {
+						where: data.field
+					})
+					return false;
+				});
+
+				form.on('switch(user-enable)', function(obj) {
+					layer.tips(this.value + ' ' + this.name + '：' + obj.elem.checked, obj.othis);
+				});
+
+				window.add = function() {
+					drawer.open({
+						direction: "top",
+						dom: ".layer-top",
+						distance: "30%"
+					});
+				}
+
+				window.edit = function(obj) {
+					layer.msg("修改");
+				}
+
+				window.remove = function(obj) {
+					layer.confirm('确定要删除该用户', {
+						icon: 3,
+						title: '提示'
+					}, function(index) {
+						layer.close(index);
+						let loading = layer.load();
+						$.ajax({
+							url: MODULE_PATH + "remove/" + obj.data['userId'],
+							dataType: 'json',
+							type: 'delete',
+							success: function(result) {
+								layer.close(loading);
+								if (result.success) {
+									layer.msg(result.msg, {
+										icon: 1,
+										time: 1000
+									}, function() {
+										obj.del();
+									});
+								} else {
+									layer.msg(result.msg, {
+										icon: 2,
+										time: 1000
+									});
+								}
+							}
+						})
+					});
+				}
+
+				window.batchRemove = function(obj) {
+					let data = table.checkStatus(obj.config.id).data;
+					if (data.length === 0) {
+						layer.msg("未选中数据", {
+							icon: 3,
+							time: 1000
+						});
+						return false;
+					}
+					let ids = "";
+					for (let i = 0; i < data.length; i++) {
+						ids += data[i].userId + ",";
+					}
+					ids = ids.substr(0, ids.length - 1);
+					layer.confirm('确定要删除这些用户', {
+						icon: 3,
+						title: '提示'
+					}, function(index) {
+						layer.close(index);
+						let loading = layer.load();
+						$.ajax({
+							url: MODULE_PATH + "batchRemove/" + ids,
+							dataType: 'json',
+							type: 'delete',
+							success: function(result) {
+								layer.close(loading);
+								if (result.success) {
+									layer.msg(result.msg, {
+										icon: 1,
+										time: 1000
+									}, function() {
+										table.reload('user-table');
+									});
+								} else {
+									layer.msg(result.msg, {
+										icon: 2,
+										time: 1000
+									});
+								}
+							}
+						})
+					});
+				}
+
+				window.refresh = function(param) {
+					table.reload('user-table');
+				}
+			}) -->
+		<!-- </script>  -->
+
+
+</body>
+</html>

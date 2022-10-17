@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="utf-8">
+		<title>交易分析</title>
+		<meta name="renderer" content="webkit">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<link rel="stylesheet" href="../../../component/pear/css/pear.css" />
+		<link rel="stylesheet" href="../../../admin/css/other/console2.css" />
+        <script src="../../../component/layui/layui.js"></script>
+        <script src="../../../component/axios.min.js"></script>
+        <script src="../../../component/vue.js"></script>
+        <script src="../../../component/g6.min.js"></script>
+        <script src="../../../component/pear/pear.js"></script>
+</head>
+<body>
+        <div class="layui-row layui-row layui-col-space12"  style="background: #eeeeee">
+            <div class="layui-col-md12"  id="container">
+                <div class="layui-row layui-col-space9 layui-form-item" id="topline">
+                    <div class="layui-form layui-row layui-col-md1">
+                        <select id="num" lay-filter="num" lay-verify="">
+                            <option value="">展开地址数量</option>
+                            <option value="2">2</option>
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                        </select>
+                    </div>
+                    <div class="layui-col-md3">
+                        <input id="date" type="text" name="keyword" placeholder="请选择日期范围" class="layui-input">
+                    </div>
+                    <div class="layui-col-md4">
+                        <input type="text" name="keyword" placeholder="输入搜索地址" class="layui-input">
+                    </div>
+                    &emsp;
+                    <button class="pear-btn pear-btn-primary" lay-submit lay-filter="power-query" >
+                        <i class="layui-icon layui-icon-search"></i>分析</button>
+                </div>
+            </div>
+            <div class="layui-row layui-card" id="card"><i class="layui-icon layui-icon-close-fill" id="hide"></i>
+                <h3 class="title layui-font-20 layui-font-green">地址信息</h3><br>
+                <ul class="list">
+                    <li class="list-item"><span class="title layui-font-16">地址</span><br><span class="footer">{{target}}</span></li><br>
+                    <li class="list-item"><span class="title layui-font-16">标签</span><br><span class="footer">{{target}}</span></li><br>
+                    <li class="list-item"><span class="title layui-font-16">标注</span><br><span class="footer">{{target}}</span></li><br>
+                    <li class="list-item"><span class="title layui-font-16">类型</span><br><span class="footer">{{target}}</span></li><br>
+                    <li class="list-item"><span class="title layui-font-16">当前余额</span><br><span class="footer">{{target}}</span></li><br>
+                    <li class="list-item"><span class="title layui-font-16">最近交易时间</span><br><span class="footer">{{target}}</span></li><br>
+                    <li class="list-item"><span class="title layui-font-16">首次交易时间</span><br><span class="footer">{{target}}</span></li><br>
+                </ul>
+
+            </div>
+        </div>
+        <script>
+            layui.use(['laydate', 'jquery', 'popup', 'code','form'],  function(){
+                var laydate = layui.laydate;
+                var popup = layui.popup;
+			    var $ = layui.jquery;
+                var form = layui.form;
+                form.on('select(num)', function(data){
+                    spreadNum_now = data.value;
+                    if(!window.localStorage){
+                        alert("浏览器支持localstorage");
+                        return false;
+                    }else{
+                        var storage=window.localStorage;
+                        storage.setItem("spreadNum_default",2);
+                        storage.setItem("spreadNum_now",spreadNum_now);
+                    }
+                    if(spreadNum_now!==spreadNum_default) {
+                        storage.setItem("spreadNum_default", spreadNum_now);
+                        location.reload()
+                    }
+                })
+                $('#num').val(spreadNum_now);
+                form.render();
+                laydate.render({
+                elem: '#date',
+                type: 'date',
+                range: true,
+                });
+                layui.code()
+            });
+            var storage=window.localStorage;
+            var spreadNum_default=storage.getItem("spreadNum_default")
+            var spreadNum_now=storage.getItem("spreadNum_now")
+            if(!spreadNum_now){spreadNum=2}else{spreadNum = spreadNum_now;}
+            var date = document.getElementById('date')
+            new Vue ({
+                el: 'container',
+                data() {
+                    return{
+                        dataList: {},
+                        dataList2: {},
+                        count: 0,
+                    }
+                },
+                components:{},
+                created (){
+                    // this.getRoot()
+                },
+                mounted (){
+                    this.getRoot()
+                    this.getData()
+                },
+                methods: {
+                    async getRoot() {
+                        const root = {}
+                        let search_address = '1DZTzaBHUDM7T3QvUKBz4qXMRpkg8jsfB5'
+                        let url1 = 'http://127.0.0.1:8000/pre_address?address=' + search_address;
+                        await axios.get(url1).then(res => {
+                            input_data = res.data
+                        });
+                        let url2 = 'http://127.0.0.1:8000/next_address?address=' + search_address;
+                        await axios.get(url2).then(res => {
+                            output_data = res.data
+                        });
+                        root.id = '1';
+                        root.nood = 0;
+                        root.text1 = 'BTC-HASH';
+                        root.address = search_address;
+                        root.direction = 0;
+                        root.children = [];
+                        root.isSpread = true;
+                        for(let i=0;i<5;i++){
+                            if(output_data[i]){
+                                let child = {};
+                                child.id = 'i-'+i;
+                                child.nood = 1;
+                                child.direction = 2;
+                                child.count = output_data[i].count,
+                                child.address = output_data[i].address
+                                // child.text2 = output_data[i].output_address, 金额
+                                child.data = output_data[i].data
+                                child.url = "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg",
+                                root.children.push(child);
+                            }
+                            if(input_data[i]){
+                                let child = {}
+                                child.id = 'o-'+i;
+                                child.nood = 1;
+                                child.direction = 1;
+                                child.count = input_data[i].count,
+                                child.address = input_data[i].address
+                                // child.text2 = inputs_data[i].input_address
+                                child.data = input_data[i].data
+                                child.url = "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg",
+                                root.children.push(child)
+                                }
+                            }
+                        this.dataList = root
+                        this.render()
+                    },
+                    async getData() {
+                        const d = [];
+                        const url = 'http://127.0.0.1:8000/next_address?address=' + this.search_address;
+                        await axios.get(url).then(res => {
+                            output_data = res.data;
+                        })
+                        if(this.search_address&&output_data.length>0){
+                            let num = output_data.length<spreadNum?output_data.length:spreadNum;
+                            for (let i = 0; i < num; i++) {
+                                const root = {};
+                                root.id = 'o-' + this.count + '-' + i;
+                                root.nood = 1;
+                                root.direction = 2;
+                                root.count = output_data[i].count,
+                                root.address = output_data[i].address
+                                root.isSpread = false;
+                                d.push(root)
+                            }
+                        }
+                        this.dataList2 = d
+                    },
+                    async render() {
+                        let _this = this
+                        //  组件props
+                        const props = {
+                            data: _this.dataList,
+                            config: {
+                                padding: [20, 50],
+                                defaultLevel: 3,
+                                defaultZoom: 0.8,
+                            },
+                        };
+                        const container = document.getElementById('container');
+                        const width = container.scrollWidth;
+                        const height = 900;
+
+                        // 默认配置
+                        const defaultConfig = {
+                            width,
+                            height,
+                            modes: {
+                                default: [
+                                    'zoom-canvas', 'drag-canvas','click-select',
+                                    {
+                                        type: 'collapse-expand',
+                                        onChange: function onChange(item, collapsed) {
+                                          const data = item.get('model');
+                                          graph.updateItem(item, {
+                                            collapsed,
+                                          });
+                                          data.collapsed = collapsed;
+                                          return true;
+                                        },
+                                    },
+                                    {
+                                        type: 'tooltip', // 提示框
+                                        formatText(model) {
+                                        // 提示框文本内容
+                                        const text =  '地址:' + model.address + '<br/> 交易笔数: ' + model.count;
+                                        return text;
+                                        },
+                                    },
+                                ],
+                            },
+                            fitView: true,
+                            animate: true,
+                            defaultNode: {
+                                type: 'tree-node',
+                                anchorPoints: [
+                                    [0, 0.5],
+                                    [1, 0.5],
+                                ],
+                            },
+                            defaultEdge: {
+                            // 指定边的类型，可以是内置边的类型名称，也可以是自定义边的名称。默认为 'line'
+                            type: 'cubic-horizontal',
+                            // 边的样式属性
+                            style: {
+                                stroke: '#A3B1BF',
+                                // 开始箭头
+                                startArrow: {
+                                path: G6.Arrow.circle(1, 12), // 内置样式
+                                fill: '#A3B1BF', // 颜色
+                                d: 13, // 偏移距离
+                                },
+                                // 结束箭头
+                                endArrow: {
+                                path: 'M 0,0 L 5,3 L 5,-4 Z', // 自定义样式
+                                fill: '#A3B1BF',
+                                d: 1,
+                                },
+                            },
+                            },
+                            layout: {
+                                type: 'compactBox',
+                                direction: 'H',
+                                dropCap: false,
+                                getSide: (d) => {
+                                    if (d.data.direction == '1') {
+                                    return 'right';
+                                    }
+                                    return 'left';
+                                },
+                                getId: function getId(d) {
+                                    return d.id;
+                                },
+                                // 节点高度的回调函数
+                                getHeight: function getHeight() {
+                                    return 40;
+                                },
+                                // 节点宽度的回调函数
+                                getWidth: function getWidth() {
+                                    return 20;
+                                },
+                                // 节点纵向间距的回调函数
+                                getVGap: function getVGap() {
+                                    return 10;
+                                },
+                                // 节点横向间距的回调函数
+                                getHGap: function getHGap() {
+                                    return 100;
+                                },
+                            },
+                        };
+
+                        // 自定义节点、边
+                        G6.registerNode(
+                          'tree-node',
+                          {
+                            drawShape: function drawShape(cfg, group) {
+                              const rect = group.addShape('rect', {
+                                attrs: {
+                                  fill: '#fff',
+                                  stroke: '#666',
+                                  x: 0,
+                                  y: 0,
+                                  width:1,
+                                  height: 1
+                                },
+                                name: 'rect-shape',
+                              });
+                              const content = cfg.address.substr(cfg.address,14)+'...';
+                              const text = group.addShape('text', {
+                                attrs: {
+                                  text: content,
+                                  x: 0,
+                                  y: 0,
+                                  textAlign: 'left',
+                                  textBaseline: 'middle',
+                                  fill: '#666',
+                                },
+                                name: 'text-shape',
+                              });
+                              const bbox = text.getBBox();
+                              const hasChildren = cfg.isSpread;
+                              rect.attr({
+                                x: -bbox.width / 2 - 4,
+                                y: -bbox.height / 2 - 6,
+                                width: bbox.width + (hasChildren ? 26 : 12),
+                                height: bbox.height + 12,
+                              });
+                              text.attr({
+                                x: -bbox.width / 2,
+                                y: 0
+                              })
+                              if(cfg.nood == '1'){
+                                group.addShape('text', {
+                                    attrs: {
+                                        x: cfg.direction == '2' ? -bbox.width / 2 - 10 : bbox.width / 2 + 14,
+                                        y: 0,
+                                        textAlign: 'center',
+                                        textBaseline: 'middle',
+                                        text: cfg.isSpread ? '-' : '+',
+                                        fontSize: 20,
+                                        cursor: 'pointer',
+                                        fill: 'rgba(0, 0, 0, 0.25)',
+                                    },
+                                    name: 'collapse-text',
+                                    modelId: cfg.id,
+                                });
+                               }
+                              return rect;
+                            },
+                            update: (cfg, item) => {
+                              const group = item.getContainer();
+                              const icon = group.find((e) => e.get('name') === 'collapse-icon');
+                              icon.attr('symbol', cfg.collapsed ? G6.Marker.expand : G6.Marker.collapse);
+                            },
+                          },
+                          'single-node',
+                        );
+                        const {data} = props;
+                        let graph = null;
+
+                        const initGraph = (data) => {
+                            if (!data) {
+                                return;
+                            }
+                            const {onInit, config} = props;
+                            graph = new G6.TreeGraph({
+                                container: 'container',
+                                ...defaultConfig,
+                                ...config,
+                                plugins: [],
+                                // fitView: true,
+                                // fitViewPadding:300
+                            });
+                            if (typeof onInit === 'function') {
+                                onInit(graph);
+                            }
+
+                            console.log(this.dataList2.children)
+                            graph.zoom(0.4, { x: 600, y: 400 });
+
+                            const handleCollapse = (e) => {
+                                const target = e.target;
+                                const id = target.get('modelId');
+                                const item = graph.findById(id);
+                                const nodeModel = item.getModel();
+                                nodeModel.collapsed = !nodeModel.collapsed;
+                                graph.layout();
+                                graph.setItemState(item, 'collapse', nodeModel.collapsed);
+                            };
+                            graph.on('collapse-text:click', (e) => {
+                                handleCollapse(e);
+                            });
+                            graph.on('collapse-back:click', (e) => {
+                                handleCollapse(e);
+                            });
+                        };
+
+                        initGraph(data);
+                        if(this.dataList2.children==undefined){
+                            graph.data(this.dataList);
+                            graph.render();
+                            graph.zoomTo(1);
+                            graph.fitCenter();
+                            graph.on('node:click', async (e) => {
+                                const item = e.item;
+                                const nodeId = item.get('id');
+                                const model = item.getModel();
+                                _this.search_address = model.address;
+                                _this.direction = model.direction;
+                                if (!model.isSpread) {
+                                    await _this.getData()
+                                    _this.count += 1;
+                                    graph.updateChildren(_this.dataList2, nodeId)
+                                    model.isSpread = true
+                                    graph.fitCenter()
+                                }
+                            });
+                        }
+                        // setTimeout(() => {
+                        //     // todo 浏览器窗口发生变化时
+                        //     window.onresize = function () {
+                        //     // todo 获取div parentContent 的宽度和高度
+                        //     this.canvasWidth = _this.$refs.parentContent.clientWidth
+                        //     this.canvasHeight = _this.$refs.parentContent.clientHeight
+                        //     // todo 修改画布的大小
+                        //     graph.changeSize(this.canvasWidth, this.canvasHeight)
+                        //     // todo 将图移动到画布中心位置
+                        //     graph.fitCenter()
+                        //     }
+                        //     }, 20)
+                        if (typeof window !== 'undefined')
+                            window.onresize = () => {
+                                if (!graph || graph.get('destroyed')) return;
+                                if (!container || !container.scrollWidth || !container.scrollHeight) return;
+                                graph.changeSize(container.scrollWidth, container.scrollHeight);
+                            };
+                    },
+                }
+            })
+        storage.removeItem('spreadNum_default');
+        storage.removeItem('spreadNum_now');
+        </script>
+        <script>
+            var shownBoolean =  true
+            var btn = document.getElementById('hide')
+            var box = document.getElementById('card')
+            btn.addEventListener('click', function() {
+                    box.style.display = 'none';
+
+            })
+        </script>
+        <style>
+            body{
+                background-color:azure;
+            }
+            #card{
+                background-color: white;
+                position: absolute;
+                right: 10px;
+                top: 38px;
+                width: 300px;
+                height: 500px;
+                z-index: 9999;
+            }
+            #hide{
+                float: right;
+                margin:0;
+                font-size: 25px;
+            }
+            #topline{
+                margin-top: 5mm;
+            }
+        </style>
+</body>
+</html>

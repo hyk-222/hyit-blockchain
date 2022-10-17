@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>新增页面</title>
+		<link rel="stylesheet" href="../../../component/pear/css/pear.css" />
+		<style>
+			.layui-input1 {
+				height: 44px !important;
+				line-height: 44px !important;
+				padding-left: 15px !important;
+				border-radius: 3px !important;
+			}
+			.layui-input1:focus {
+				box-shadow: 0px 0px 2px 1px #5FB878 !important;
+			}
+		</style>
+	</head>
+	<body>
+		<form class="layui-form" action="">
+			<div class="mainBox">
+				<div class="main-container">
+					<div class="layui-form-item">
+						<label class="layui-form-label">电话号码</label>
+						<div class="layui-input-block">
+							<input type="text" name="username" lay-verify="required" autocomplete="off" placeholder="请输入电话号码"
+								class="layui-input">
+<!--							<input required lay-verify="required" id="bookName" type="text" name="bookName"-->
+<!--                               placeholder="请输入书名" autofocus-->
+<!--                               class="layui-input" autocomplete="off">-->
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">IMEI1</label>
+						<div class="layui-input-block">
+							<input type="text" name="IMEI1" lay-verify="title" autocomplete="off" placeholder="请输入IMEI1"
+								class="layui-input">
+						</div>
+					</div>
+                    <div class="layui-form-item">
+						<label class="layui-form-label">IMEI2</label>
+						<div class="layui-input-block">
+							<input type="text" name="IMEI2" lay-verify="title" autocomplete="off" placeholder="请输入IMEI2"
+								class="layui-input">
+						</div>
+					</div>
+                    <div class="layui-form-item">
+						<label class="layui-form-label">IMSI</label>
+						<div class="layui-input-block">
+							<input type="text" name="IMSI" lay-verify="title" autocomplete="off" placeholder="请输入IMSI"
+								class="layui-input">
+						</div>
+					</div>
+                    <div class="layui-form-item">
+						<label class="layui-form-label">MAC</label>
+						<div class="layui-input-block">
+							<input type="text" name="MAC" lay-verify="title" autocomplete="off" placeholder="请输入MAC"
+								class="layui-input">
+						</div>
+					</div>
+                    <!-- <div class="layui-form-item">
+						<label class="layui-form-label">居住地-省</label>
+						<div class="layui-input-block">
+							<input type="text" name="username" lay-verify="title" autocomplete="off" placeholder="请输入标题"
+								class="layui-input">
+						</div>
+					</div>
+                    <div class="layui-form-item">
+						<label class="layui-form-label">居住地-市</label>
+						<div class="layui-input-block">
+							<input type="text" name="username" lay-verify="title" autocomplete="off" placeholder="请输入标题"
+								class="layui-input">
+						</div>
+					</div>
+                    <div class="layui-form-item">
+						<label class="layui-form-label">居住地-区</label>
+						<div class="layui-input-block">
+							<input type="text" name="username" lay-verify="title" autocomplete="off" placeholder="请输入标题"
+								class="layui-input">
+						</div>
+					</div> -->
+
+
+                    <div class="layui-col-md12">
+                        <div class="layui-inline" id="area-picker">
+                            <!-- <div class="layui-form-item" id="area-picker"> -->
+                            <div class="layui-form-label">居住地</div>
+                            <div class="layui-input-inline" style="width: 100px;">
+                                <!-- <select name="province" class="province-selector" data-value="江苏省"> -->
+								<select name="live_pro" class="province-selector">
+                                    <option value="">请选择省</option>
+                                </select>
+                            </div>
+                            <div class="layui-input-inline" style="width: 100px;">
+                                <select name="live_city" class="city-selector">
+                                    <option value="">请选择市</option>
+                                </select>
+                            </div>
+                            <div class="layui-input-inline" style="width: 100px;">
+                                <select name="live_region" class="county-selector">
+                                    <option value="">请选择区</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+						<label class="layui-form-label">居住地-poi</label>
+						<div class="layui-input-block">
+							<input type="text" name="live_poi" lay-verify="title" autocomplete="off" placeholder="请输入居住地poi"
+								class="layui-input">
+						</div>
+					</div>
+
+					<div class="layui-col-md12">
+                        <div class="layui-inline" id="area-picker2">
+                            <!-- <div class="layui-form-item" id="area-picker"> -->
+                            <div class="layui-form-label">工作地</div>
+                            <div class="layui-input-inline" style="width: 100px;">
+                                <select name="job_pro" class="province-selector">
+                                    <option value="">请选择省</option>
+                                </select>
+                            </div>
+                            <div class="layui-input-inline" style="width: 100px;">
+                                <select name="job_city" class="city-selector">
+                                    <option value="">请选择市</option>
+                                </select>
+                            </div>
+                            <div class="layui-input-inline" style="width: 100px;">
+                                <select name="job_region" class="county-selector">
+                                    <option value="">请选择区</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- <div class="layui-form-item">
+						<label class="layui-form-label">工作地-省</label>
+						<div class="layui-input-block">
+							<input type="text" name="username" lay-verify="title" autocomplete="off" placeholder="请输入标题"
+								class="layui-input">
+						</div>
+					</div>
+                    <div class="layui-form-item">
+						<label class="layui-form-label">工作地-市</label>
+						<div class="layui-input-block">
+							<input type="text" name="username" lay-verify="title" autocomplete="off" placeholder="请输入标题"
+								class="layui-input">
+						</div>
+					</div>
+                    <div class="layui-form-item">
+						<label class="layui-form-label">工作地-区</label>
+						<div class="layui-input-block">
+							<input type="text" name="username" lay-verify="title" autocomplete="off" placeholder="请输入标题"
+								class="layui-input">
+						</div>
+					</div> -->
+                    <div class="layui-form-item">
+						<label class="layui-form-label">工作地-poi</label>
+						<div class="layui-input-block">
+							<input type="text" name="job_poi" lay-verify="title" autocomplete="off" placeholder="请输入工作地poi"
+								class="layui-input">
+						</div>
+					</div>
+                    <div class="layui-form-item">
+						<label class="layui-form-label">系统语言</label>
+						<div class="layui-input-block">
+							<input type="text" name="use_language" lay-verify="title" autocomplete="off" placeholder="请输入系统语言"
+								class="layui-input">
+						</div>
+					</div>
+                    <div class="layui-form-item">
+						<label class="layui-form-label">世界时区</label>
+						<div class="layui-input-inline">
+							<select name="time_zones" lay-verify="" >
+								<option value="">请选择时区</option>
+								<option value="utc">中时区</option>
+								<option value="utc+1">东1区</option>
+								<option value="utc+2">东2区</option>
+								<option value="utc+3">东3区</option>
+								<option value="utc+4">东4区</option>
+								<option value="utc+5">东5区</option>
+								<option value="utc+6">东6区</option>
+								<option value="utc+7">东7区</option>
+								<option value="utc+8" selected>东8区</option>
+								<option value="utc+9">东9区</option>
+								<option value="utc+10">东10区</option>
+								<option value="utc+11">东11区</option>
+								<option value="ew12">东西12区</option>
+								<option value="utc-11">西11区</option>
+								<option value="utc-10">西10区</option>
+								<option value="utc-9">西9区</option>
+								<option value="utc-8">西8区</option>
+								<option value="utc-7">西7区</option>
+								<option value="utc-6">西6区</option>
+								<option value="utc-5">西5区</option>
+								<option value="utc-4">西4区</option>
+								<option value="utc-3">西3区</option>
+								<option value="utc-2">西2区</option>
+								<option value="utc-1">西1区</option>
+							</select>
+						</div>
+					</div>
+                    <div class="layui-form-item">
+						<label class="layui-form-label">设备标签</label>
+						<div class="layui-input-block">
+							<input type="text" name="lable" lay-verify="title" autocomplete="off" placeholder="请输入标题"
+								class="layui-input">
+						</div>
+					</div>
+				</div>
+
+					<div class="layui-form-item">
+						<label class="layui-form-label">应用名称</label>
+						<div class="layui-input-block">
+							<input type="text" name="app_name" lay-verify="title" autocomplete="off" placeholder="请输入MAC"
+								class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">应用包名</label>
+						<div class="layui-input-block">
+							<input type="text" name="packages_name" lay-verify="title" autocomplete="off" placeholder="请输入MAC"
+								class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">设备状态</label>
+						<div class="layui-input-block">
+							<input type="text" name="Install_state" lay-verify="title" autocomplete="off" placeholder="请输入标题"
+								class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">首次安装时间</label>
+						<div class="layui-input-block">
+							<input type="text" name="first_install_time" lay-verify="title" autocomplete="off" placeholder="请输入MAC"
+								class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">末次安装时间</label>
+						<div class="layui-input-block">
+							<input type="text" name="end_install_time" lay-verify="title" autocomplete="off" placeholder="请输入MAC"
+								class="layui-input">
+						</div>
+					</div>
+				<div class="layui-form-item">
+						<label class="layui-form-label">卸载次数</label>
+						<div class="layui-input-block">
+							<input type="text" name="uninstall_number" lay-verify="title" autocomplete="off" placeholder="请输入MAC"
+								class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">最近活跃时间</label>
+						<div class="layui-input-block">
+							<input type="text" name="active_time" lay-verify="title" autocomplete="off" placeholder="请输入MAC"
+								class="layui-input">
+						</div>
+					</div>
+				<div class="layui-form-item">
+						<label class="layui-form-label">上传人</label>
+						<div class="layui-input-block">
+							<input type="text" name="upload_name" lay-verify="required" autocomplete="off" placeholder="请输入上传人"
+								class="layui-input">
+						</div>
+					</div>
+				</div>
+				</div>
+			</div>
+			<div class="bottom">
+				<div class="button-container">
+					<button type="submit" class="pear-btn pear-btn-primary pear-btn-sm" lay-submit=""
+						lay-filter="user-save">
+						<i class="layui-icon layui-icon-ok"></i>
+						提交
+					</button>
+					<button type="reset" class="pear-btn pear-btn-sm">
+						<i class="layui-icon layui-icon-refresh"></i>
+						重置
+					</button>
+				</div>
+			</div>
+		</form>
+		<script src="../../../component/layui/layui.js"></script>
+		<script src="../../../component/pear/pear.js"></script>
+		<script>
+			layui.use(['form', 'jquery', 'area'], function() {
+				let form = layui.form;
+				let $ = layui.jquery;
+
+				var area = layui.area;
+
+				area.render({
+					elem: '#area-picker',
+					change: function(res) {
+					//选择结果
+						console.log(res);
+					}
+				});
+
+				area.render({
+					elem: '#area-picker2',
+					change: function(res) {
+						//选择结果
+						console.log(res);
+					}
+				});
+
+				area.render({
+					elem: '#area-picker-copy',
+					change: function(res) {
+					//选择结果
+						console.log(res);
+					}
+				});
+
+				form.on('submit(user-save)', function(data) {
+					$.ajax({
+						url: 'http://127.0.0.1:8000/all_vpn_insert',
+						data: JSON.stringify(data),
+						dataType: 'json',
+						contentType: 'application/json',
+						type: 'post',
+						async:true,
+						success: function(result) {
+							if (result.success) {
+								layer.msg(result.msg+'新增成功！', {
+									icon: 1,
+									time: 1000
+								}, function() {
+									parent.layer.close(parent.layer.getFrameIndex(window
+										.name)); //关闭当前页
+									parent.layui.table.reload("user-table");
+								});
+							} else {
+								layer.msg(result.msg+'新增失败！', {
+									icon: 2,
+									time: 1000
+								});
+							}
+						}
+					})
+					return false;
+				});
+
+
+
+			})
+		</script>
+		<script>
+		</script>
+	</body>
+</html>

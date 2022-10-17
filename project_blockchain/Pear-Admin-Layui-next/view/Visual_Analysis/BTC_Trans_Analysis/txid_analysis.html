@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+		<title>交易分析</title>
+		<meta name="renderer" content="webkit">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<link rel="stylesheet" href="../../../component/pear/css/pear.css" />
+		<link rel="stylesheet" href="../../../admin/css/other/console2.css" />
+        <script src="https://gw.alipayobjects.com/os/antv/pkg/_antv.g6-4.2.3/dist/g6.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <script src="../../../component/layui/layui.js"></script>
+        <script src="../../../component/pear/pear.js"></script>
+    </head>
+    <body>
+        <div id="container" class="layui-row layui-col-space12"  style="background: #eeeeee">
+            <div id="parentcontent" ref="parentContent" class="layui-col-md10">
+                <div class="layui-row layui-col-space9">
+                    <div class="layui-form layui-row layui-col-md2">
+                        <select id="num" lay-filter="a" lay-verify="">
+                            <option value="">请选择展开地址数量</option>
+                            <option value="2">2</option>
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                        </select>
+                    </div>
+                    <div class="layui-col-md8 layui-input-inline">
+                        <input id="searchinfo" type="text" name="keyword" placeholder="请输入交易哈希" class="layui-input">
+                    </div>
+                    <button class="pear-btn pear-btn-md pear-btn-primary" to>
+                        分析</button>
+                    <button class="pear-btn pear-btn-md pear-btn-primary" refresh>
+                        <i class="layui-icon layui-icon-refresh" refresh></i>重置</button>
+                </div>
+                <div class="layui-col-space9" id="pic" ref="pic">
+                </div>
+            </div>
+            <div class="layui-col-md2" id="card">
+                <div class="layui-card">
+                    <div class="layui-card-header layui-font-20 layui-font-green" ><i class="layui-icon layui-icon-close-fill" id="hide"></i>交 易 详 情</div>
+                    <div class="layui-card-body" id="trans_info">
+
+                            <li class="list-item"><span class="title layui-font-16">{{type}}<br></span><span class="footer w_space-item">{{target}}&emsp;&emsp;&emsp;</span><a class="toast-success pear-btn pear-btn-xs" @click="getCopy">复制</a></li><br>
+                            <li class="list-item "><span class="title layui-font-16">输入金额</span><br><span class="footer w_space-item">{{input_value}}&emsp;BTC</span></li><br>
+                            <li class="list-item "><span class="title layui-font-16">输出金额</span><br><span class="footer w_space-item">{{output_value}}&emsp;BTC</span></li><br>
+                            <li class="list-item"><span class="title layui-font-16">{{type1}}<br></span><span class="footer">{{type_1}}</span></li><br>
+                            <li class="list-item"><span class="title layui-font-16">{{type3}}</span><br><span class="footer">{{output_time}}</span></li><br>
+                            <li class="list-item"><span class="title layui-font-16">{{type2}}</span><br><span class="footer">{{spending_time}}</span></li><br>
+
+                    </div>
+                    <div class="layui-tab layui-card" id="inout">
+                    <ul class="layui-tab-title">
+                        <li class="layui-this">输入地址</li>
+                        <li>输出地址</li>
+                    </ul>
+                    <div id="test1" class="layui-tab-content">
+                        <div class="layui-tab-item layui-show">
+                            <div class="contant">
+                                <div id="in"></div>
+                            </div>
+                        </div>
+                        <div class="layui-tab-item">
+                            <div class="contant">
+                                <div id="out"></div>
+                            </div></div>
+                    </div>
+                    </div>
+                </div>
+                </div>
+
+        </div>
+    <script>
+        //  自定义展开数量
+        var storage=window.localStorage;
+        var spreadNum;
+        layui.use(['element', 'jquery', 'loading', 'form','code','toast','laypage'], function() {
+                var element = layui.element;
+                var $ = layui.jquery;
+                var loading = layui.loading;
+                var form = layui.form;
+                var layer = layui.layer;
+                var toast = layui.toast;
+                var laypage = layui.laypage;
+                layui.form.on('select(a)', function(data){
+                    spreadNum_now = data.value;
+                    if(!window.localStorage){
+                        alert("浏览器支持localstorage");
+                        return false;
+                    }else{
+                        var storage=window.localStorage;
+                        storage.setItem("spreadNum_default",2);
+                        storage.setItem("spreadNum_now",spreadNum_now);
+                    }
+                    if(spreadNum_now!==spreadNum_default){
+                        storage.setItem("spreadNum_default",spreadNum_now);
+                        location.reload()
+                    }
+                });
+                $('#num').val(spreadNum_now);
+                form.render();
+                $('[refresh]').click(function () {
+                    location.reload()
+                });
+                $(".toast-success").click(function() {
+                    toast.success({
+                        title: 'Caution',
+                        message: '已复制到粘贴板',
+                        position: 'topCenter',
+                    });
+                })
+                var infoInput = document.getElementById('searchinfo');
+                $("[to]").click(function(){
+                    search_txid = infoInput.value
+                    if(search_txid){
+                    window.location.href = 'txid_analysis.html?value=' + infoInput.value;
+                    }else {alert("错误");
+                    }
+                })
+        })
+        var spreadNum_default=storage.getItem("spreadNum_default")
+        var spreadNum_now=storage.getItem("spreadNum_now")
+        var default_txid = storage.getItem("search_txid")
+        if(!spreadNum_now){spreadNum=2}else{spreadNum = spreadNum_now;}
+        var vm = new Vue({
+        el: '#container',
+        data() {
+            return {
+                dataList: {},
+                dataList2: {},
+                id: "",
+                count: 1,
+                direction: 0,
+                type:'',
+                type1:'',
+                type2:'',
+                type3:'',
+                target: '',
+                target_copy: '',
+                type_1:'',
+                output_time: '',
+                spending_time: '',
+                input_value: '',
+                output_value:'',
+                outputs_address: '',
+                inputs_address: '',
+            }
+        },
+        components:{
+        },
+        created (){
+            this.isLoading = false
+        },
+        mounted () {
+            this.getData();
+            this.getRoot();
+            this.getDetail();
+            this.getCopy();
+            // this.render();
+        },
+        methods: {
+            // 从api获取初始数据
+            async getRoot() {
+                let inputs_data;
+                let outputs_data;
+                const root = {}; // 接收参数
+                this.type = '交易哈希号'
+                var tx = document.location.href.split('=');
+                let search_txid = tx[1]
+                this.target_copy = search_txid;
+                this.txid = search_txid;
+                this.type3 = '手续费';
+                // 文本超出隐藏
+                // fittingString(字段, 最大长度, 字体大小)
+                const fittingString = (str, maxWidth, fontSize) => {
+                    const ellipsis = '...';
+                    const ellipsisLength = G6.Util.getTextSize(ellipsis, fontSize)[0];
+                    let currentWidth = 0;
+                    let res = str;
+                    const pattern = new RegExp('[\u4E00-\u9FA5]+'); // distinguish the Chinese charactors and letters
+                    if(res!==undefined){
+                    str.split('').forEach((letter, i) => {
+                    if (currentWidth > maxWidth - ellipsisLength) return;
+                    if (pattern.test(letter)) {
+                        // Chinese charactors
+                        currentWidth += fontSize;
+                    } else {
+                        // get the width of single letter according to the fontSize
+                        currentWidth += G6.Util.getLetterWidth(letter, fontSize);
+                    }
+                    if (currentWidth > maxWidth - ellipsisLength) {
+                        res = `${str.substr(0, i)}${ellipsis}`;
+                    }
+                    });
+                    }
+                    return res;
+                };
+                this.target = fittingString(search_txid,130,12);
+                // let search_txid="93761c9992a5348618bdc3267613a34d3ece986bcab1d86bfeb8eee2c788fe51";
+                let url2 = 'http://127.0.0.1:8000/transaction_pre_query?txid=' + search_txid;
+                await axios.get(url2).then(res => {
+                    inputs_data = res.data.data;
+                });
+                let url1 = 'http://127.0.0.1:8000/transaction_next_query?txid=' + search_txid;
+                await axios.get(url1).then(res => {
+                    outputs_data = res.data.data;
+                });
+                root.id = '1';
+                root.nood = 0;
+                root.text1 = 'BTC-HASH';
+                root.text2 = search_txid;
+                root.direction = 0;
+                root.children = [];
+                for(let i=0;i<spreadNum;i++){
+                    if(outputs_data[i]){
+                    let child = {};
+                    child.id = 'i-'+i;
+                    child.nood = 2;
+                    child.direction = 2;
+                    if(outputs_data[i].next_hash !== null){
+                        child.isSpread = true;
+                        child.spent_txid = outputs_data[i].next_hash;
+                    }else{
+                        child.isSpread = false;
+                        };
+                    child.text1 = 'BTC-ADDRESS',
+                    child.text3 = fittingString(outputs_data[i].value + ' ', 110, 12)
+                    child.text2 = outputs_data[i].output_address,
+                    child.url = "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg",
+                    root.children.push(child);
+                    }
+                    if(inputs_data[i]){
+                    let child = {}
+                    child.id = 'o-'+i;
+                    child.nood = 2;
+                    child.direction = 1;
+                    if(inputs_data[i].pre_hash !== null){
+                        child.isSpread = true;
+                        child.received_txid = inputs_data[i].pre_hash;
+                    }else{child.isSpread = false;}
+                    child.text1 = 'BTC-ADDRESS'
+                    child.text3 = fittingString(inputs_data[i].value + ' ',110,13)
+                    child.text2 = inputs_data[i].input_address
+                    child.url = "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg",
+                    root.children.push(child)
+                    }
+                }
+                this.dataList = root;
+                if(this.dataList.children.length == 0){
+                        window.location.href= '../../error/noresult.html';
+                }
+                this.txid = search_txid;
+                this.render();
+                },
+            // 动态加载的数据
+            async getData(){
+                let data;
+                let data2;
+                const root = {};
+                let spent_txid = this.spent_txid
+                console.log(spent_txid)
+                let received_txid = this.received_txid
+                let num = this.count;
+                if(spent_txid!==undefined&&received_txid==undefined){
+                    let url1 = 'http://127.0.0.1:8000/transaction_next_query?txid=' + spent_txid;
+                    await axios.get(url1).then(res => {
+                        outputs_data = res.data.data;
+                    });
+                    const child = []
+                    if(outputs_data.length >= spreadNum){
+                    for(let i=0;i<spreadNum;i++){
+                        const outputs = {}
+                        outputs.id = num + '-' + i;
+                        outputs.nood = 2;
+                        outputs.direction = 2;
+                        outputs.text1 = 'BTC-ADDRESS';
+                        outputs.text2 = outputs_data[i].output_address;
+                        console.log("out: "+outputs.text2)
+                        outputs.text3 = outputs_data[i].value + ' ';
+                        outputs.url = "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg";
+                        if(outputs_data[i].next_hash !== null){
+                        outputs.isSpread = true;
+                        outputs.spent_txid = outputs_data[i].next_hash;
+                        }else{outputs.isSpread = false;}
+                        child.push(outputs)
+                    }
+                    }else{
+                        for(let i=0;i<outputs_data.length;i++){
+                        console.log(">>>")
+                        const outputs = {}
+                        outputs.id = num + '-' + i;
+                        outputs.nood = 2;
+                        outputs.direction = 2;
+                        outputs.text1 = 'BTC-ADDRESS';
+                        outputs.text2 = outputs_data[i].output_address;
+                        outputs.text3 = outputs_data[i].value + ' ';
+                        outputs.url = "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg";
+                        if(outputs_data[i].next_hash !== null){
+                        outputs.isSpread = true;
+                        outputs.spent_txid = outputs_data[i].next_hash ;
+                        }else{outputs.isSpread = false;}
+                        child.push(outputs)
+                    }
+                    }
+                    this.dataList2 = {
+                                    id: 'hash-'+ this.count,
+                                    nood: 2,
+                                    direction: 2,
+                                    isSpread: false,
+                                    children:child,
+                                    text1: 'BTC-TXID',
+                                    text2: spent_txid,
+                                    text3: 'BTC',
+                                    url: "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg",};
+                };
+                if(received_txid!==undefined && spent_txid == undefined){
+                    let url2 = 'http://127.0.0.1:8000/transaction_pre_query?txid=' + received_txid
+                    await axios.get(url2).then(res => {
+                        inputs_data = res.data.data;
+                        });
+                    const child = []
+                    if(inputs_data.length >= spreadNum){
+                    for(let i=0;i<spreadNum;i++){
+                        const inputs = {}
+                        inputs.id = 'i' + num + '-' + i;
+                        inputs.nood = 2;
+                        inputs.direction = 1;
+                        inputs.text1 = 'BTC-ADDRESS';
+                        inputs.url = "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg";
+                        inputs.text2 = inputs_data[i].input_address;
+                        inputs.text3 = inputs_data[i].value + ' ';
+                        if(inputs_data[i].pre_hash !== null){
+                        inputs.isSpread = true;
+                        inputs.received_txid = inputs_data[i].pre_hash;
+                        }else{inputs.isSpread = false;}
+                        child.push(inputs)
+                    }
+                    }else{
+                    for(let i=0;i<inputs_data.length;i++){
+                        const inputs = {}
+                        inputs.id = 'i' + num + '-' + i;
+                        inputs.nood = 2;
+                        inputs.direction = 1;
+                        inputs.text1 = 'BTC-ADDRESS';
+                        inputs.url = "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg";
+                        inputs.text2 = inputs_data[i].input_address;
+                        inputs.text3 = inputs_data[i].value + ' ';
+                        if(inputs_data.pre_hash !== null){
+                        inputs.isSpread = true;
+                        inputs.received_txid = inputs_data[i].pre_hash;
+                        }else{inputs.isSpread = false;}
+                        child.push(inputs)
+                    }
+                    }
+                    this.dataList2 = {
+                                    id: 'hash-'+ this.count,
+                                    nood: 2,
+                                    direction: 1,
+                                    isSpread: false,
+                                    children:child,
+                                    text1: 'BTC-TXID',
+                                    text2: received_txid,
+                                    text3: 'BTC',
+                                    url: "https://gw.alipayobjects.com/zos/basement_prod/4f81893c-1806-4de4-aff3-9a6b266bc8a2.svg",};
+                    this.render();
+                }
+            },
+            //详细查询
+            async getDetail(){
+                if(this.address!==undefined){
+                    url = 'http://127.0.0.1:8000/transaction_address_detail?address=' + this.address
+                    await axios.get(url).then(res => {
+                        layui.loading.loadRemove();
+                        this.type_1=res.data.balance;
+                        this.input_value = res.data.input_value;
+                        this.output_value = res.data.output_value;
+                        this.output_time = res.data.output_time;
+                        this.spending_time = res.data.spending_time;
+                    });
+                    this.address = undefined
+                }
+                if(this.txid!==undefined){
+                    url = 'http://127.0.0.1:8000/transaction_txid_detail?txid=' + this.txid
+                    await axios.get(url).then(res => {
+                        let len1 = res.data.output.length - 1;
+                        let len2 = res.data.input.length - 1;
+                        this.type_1 = res.data.input.length +'/'+res.data.output.length;
+                        if(res.data.output[len1]){
+                            this.spending_time = res.data.output[len1].output_time;
+                        }else {this.spending_time = 'null'}
+                        this.output_time =  (res.data.fee)/100000000
+                        this.input_value = res.data.input_total;
+                        this.output_value = res.data.output_total;
+                        const outputs_address = []
+                        const inputs_address = []
+                        for(let i=0;i<len1;i++) {
+                            outputs_address.push(res.data.output[i].output_address)
+                        };
+                        for(let i=0;i<len2;i++) {
+                            inputs_address.push(res.data.input[i].input_address)
+                        };
+                        this.outputs_address = outputs_address
+                        this.inputs_address = inputs_address
+                        if(layui.loading){
+                            layui.loading.loadRemove();
+                        }
+                    });
+                    this.txid = undefined
+                };
+                var inStr = ""
+                var outStr = ""
+                var inputArr = this.inputs_address
+                var outputArr = this.outputs_address
+                if(inputArr.length){
+                    inputArr.forEach(e => {
+                        address = '369d36c21cf453da9df38f14811d15818364dc58f0537794cda6849c9ed6c338'
+                        inStr += `<div class="item-wrap">
+                    <br><a href=javascript:void(0) onclick=func(address) class="item-title">${e}</a>
+                    </div>`
+                    })
+                    //拼接完字符串数组后用innerHTML把它渲染到页面中
+                    document.getElementById("in").innerHTML = inStr;
+                }else {
+                    inStr += `<div class="item-wrap">
+                    <br><span class="item-title">null</span>
+                    </div>`
+                    document.getElementById("in").innerHTML = inStr;
+                }
+
+                if(outputArr.length){
+                    outputArr.forEach(e => {
+                        address = '369d36c21cf453da9df38f14811d15818364dc58f0537794cda6849c9ed6c338'
+                        outStr += `<div class="item-wrap">
+                    <br><a href=javascript:void(0) onclick=func(address) class="item-title">${e}</a>
+                    </div>`
+                    })
+                    //拼接完字符串数组后用innerHTML把它渲染到页面中
+                    document.getElementById("out").innerHTML = outStr;
+                }else {
+                    outStr += `<div class="item-wrap">
+                    <br><span class="item-title">null</span>
+                    </div>`
+                    document.getElementById("out").innerHTML = outStr;}
+            },
+            // 一键复制
+            async getCopy () {
+                // 手动创建 textarea 标签
+                const textarea = document.createElement('textarea')
+                // 将该 textarea 设为 readonly禁止输入 防止 iOS 下自动唤起键盘，同时将 textarea 移出可视区域
+                textarea.readOnly = 'readonly'
+                textarea.style.position = 'absolute'
+                textarea.style.left = '-9999px'
+                // 将要 copy 的值赋给 textarea 标签的 value 属性
+                textarea.value = this.target_copy
+                // 将 textarea 插入到 body 中
+                document.body.appendChild(textarea)
+                // 选中值并复制
+                textarea.select()
+                document.execCommand('Copy')
+                document.body.removeChild(textarea)
+            },
+            //自适应
+            async render () {
+            // g6 的实例方法里 this 会变
+            let _this = this;
+
+            // 文本超出隐藏
+            // fittingString(字段, 最大长度, 字体大小)
+            const fittingString = (str, maxWidth, fontSize) => {
+                const ellipsis = '...';
+                const ellipsisLength = G6.Util.getTextSize(ellipsis, fontSize)[0];
+                let currentWidth = 0;
+                let res = str;
+                const pattern = new RegExp('[\u4E00-\u9FA5]+'); // distinguish the Chinese charactors and letters
+                if(res!==undefined){
+                str.split('').forEach((letter, i) => {
+                if (currentWidth > maxWidth - ellipsisLength) return;
+                if (pattern.test(letter)) {
+                    // Chinese charactors
+                    currentWidth += fontSize;
+                } else {
+                    // get the width of single letter according to the fontSize
+                    currentWidth += G6.Util.getLetterWidth(letter, fontSize);
+                }
+                if (currentWidth > maxWidth - ellipsisLength) {
+                    res = `${str.substr(0, i)}${ellipsis}`;
+                }
+                });
+                }
+                return res;
+            };
+            // 自定义节点
+            G6.registerNode(
+                'hyit',
+                {
+                drawShape(cfg, group) {
+                    // const {collapsed} = cfg;
+                    const rect = group.addShape('rect', {
+                    attrs: {
+                        x: 0, // x 轴移动距离
+                        y: 0, // y 轴移动距离
+                        width: 185,// 宽
+                        height: 65,// 高
+                        // fill: '#666', // 背景色
+                        // stroke: '#666',// 边框色
+                    },
+                    name: 'big-rect-shape',
+                    });
+                    // 主节点
+                    if (cfg.nood  == 0){
+                    group.addShape('rect', {
+                        attrs: {
+                            fill: '#fff',
+                            shadowColor: '#c1c1c0',//阴影颜色
+                            shadowBlur: 40,//阴影范围
+                            x: 5,
+                            y: 15,
+                            width: 175,
+                            height: 35,
+                            radius: 15,
+                        },
+                        name: 'rect-shape',
+                    });
+                    group.addShape('text', {
+                        attrs: {
+                        fill: 'black',
+                        text: cfg.text2.substr(cfg.text2,8)+'...'+cfg.text2.substring(56, 64),
+                        fontSize: 15,
+                        textAlign: 'left',
+                        textBaseline: 'middle',
+                        fill: '#666',
+                        x: 15,
+                        y: 35,
+                        },
+                        name: 'source-text-shape',
+                    });
+                    }
+                    // 子节点
+                    if (cfg.nood == 2){
+                    /* 盒子 */
+                        if(cfg.text1!=='BTC-TXID'){
+                            group.addShape('rect', {
+                                attrs: {
+                                    fill: '#fff',
+                                    shadowColor: '#c1c1c0',//阴影颜色
+                                    shadowBlur: 40,//阴影范围
+                                    x: cfg.direction == '2' ? 5 : -9,
+                                    y: 0,
+                                    width: 190,
+                                    height: 65,
+                                    radius: 5,
+                                },
+                                name: 'rect-shape',
+                            });
+                        }else {
+                            group.addShape('rect', {
+                                attrs: {
+                                    fill: '#fff',
+                                    shadowColor: '#c1c1c0',//阴影颜色
+                                    shadowBlur: 40,//阴影范围
+                                    x: cfg.direction == '2' ? 5 : 3,
+                                    y: 0,
+                                    width: 175,
+                                    height: 55,
+                                    radius: 15,
+                                },
+                                name: 'rect-shape',
+                            });
+                        }
+                    /* 第一个图标 */
+                    if(!cfg.isSpread&&cfg.text1 == 'BTC-ADDRESS'){
+                        group.addShape('image', {
+                        attrs: {
+                        x: cfg.direction == '2' ? 13 : 23,
+                        y: 8,
+                        height: 14,
+                        width: 14,
+                        img: '../../../admin/images/unspent.svg',
+                        },
+                        name: 'state-icon',
+                    })}
+                    if(cfg.text1=='BTC-TXID'){
+                        group.addShape('image', {
+                        attrs: {
+                        x: cfg.direction == '2' ? 13 : 20,
+                        y: 8,
+                        height: 14,
+                        width: 14,
+                        img: '../../../admin/images/txid.svg',
+                        },
+                        name: 'state-icon',
+                    })}
+                    if(cfg.isSpread && cfg.text1=='BTC-ADDRESS'){
+                        group.addShape('image', {
+                        attrs: {
+                        x: cfg.direction == '2' ? 13 : 20,
+                        y: 8,
+                        height: 14,
+                        width: 14,
+                        img: '../../../admin/images/spent.svg',
+                        },
+                        name: 'state-icon',
+                    })}
+                    /* 第二个图标 */
+                    if(cfg.text1!=='BTC-TXID') {
+                        group.addShape('image', {
+                        attrs: {
+                        x: cfg.direction == '2' ? 13 : 20,
+                        y: 30,
+                        height: 14,
+                        width: 14,
+                        img: cfg.url,
+                        },
+                        name: 'copy-icon',
+                    })}else{
+                        group.addShape('image', {
+                        attrs: {
+                        x: cfg.direction == '2' ? 13 : 20,
+                        y: 30,
+                        height: 14,
+                        width: 14,
+                        img: cfg.url,
+                        },
+                        name: 'copy-icon',
+                    })
+                    }
+                    /* 第一行字 */
+                    if(cfg.text1!=='BTC-TXID') {
+                    group.addShape('text', {
+                        attrs: {
+                        text: cfg.text1,
+                        x: cfg.direction == '2' ? 35 : 43,
+                        y: 15,
+                        fontSize: 10,
+                        textAlign: 'left',
+                        textBaseline: 'middle',
+                        fill: '#666',
+                        },
+                        name: 'text-shape',
+                    });}else{
+                        group.addShape('text', {
+                        attrs: {
+                        text: cfg.text1,
+                        x: cfg.direction == '2' ? 35 : 43,
+                        y: 15,
+                        fontSize: 10,
+                        textAlign: 'left',
+                        textBaseline: 'middle',
+                        fill: '#666',
+                        },
+                        name: 'text-shape',
+                    })
+                    }
+                    /* 第二行字 */
+
+                    if(cfg.text1!=='BTC-TXID') {
+                        group.addShape('text', {
+                        attrs: {
+                            // fittingString(字段, 最大长度, 字体大小)
+                            text: fittingString(cfg.text2, 130, 12),
+                            x: cfg.direction == '2' ? 35 : 43,
+                            y: 35,
+                            fontSize: 12,
+                            textAlign: 'left',
+                            textBaseline: 'middle',
+                            fill: '#666',
+                        },
+                        name: 'center-text-shape',
+                    })}else{
+                        group.addShape('text', {
+                        attrs: {
+                            // fittingString(字段, 最大长度, 字体大小)
+                            text: fittingString(cfg.text2, 130, 12),
+                            x: cfg.direction == '2' ? 35 : 43,
+                            y: 35,
+                            fontSize: 12,
+                            textAlign: 'left',
+                            textBaseline: 'middle',
+                            fill: '#666',
+                        },
+                        name: 'center-text-shape',
+                    })
+                    }
+                    /* 第三行字 */
+                    if(cfg.text1!=='BTC-TXID') {
+                        group.addShape('text', {
+                            attrs: {
+                                text: fittingString(cfg.text3, 150, 12)+ 'BTC',
+                                x: cfg.direction == '2' ? 35 : 43,
+                                y: 52,
+                                fontSize: 10,
+                                textAlign: 'left',
+                                textBaseline: 'middle',
+                                fill: '#9aa1b1',
+                            },
+                            name: 'bottom-text-shape',
+                        });
+                    }
+                    /* 折叠展开 */
+                    if (cfg.isSpread) {
+                        group.addShape('text', {
+                            attrs: {
+                              x: cfg.direction == '2' ? 185 : 5,
+                              y: 33,
+                              textAlign: 'center',
+                              textBaseline: 'middle',
+                              text: cfg.isSpread ? '+' : '-',
+                              fontSize: 25,
+                              cursor: 'pointer',
+                              fill: 'rgba(0, 0, 0, 0.25)',
+                            },
+                            name: 'collapse-text',
+                            modelId: cfg.id,
+                        });
+                    }
+                    }
+                    return rect;
+                },
+                // 更新
+                update: (cfg, item) => {
+                    if(cfg.txhash){
+                    // 简单实现节流
+                    // 防止用户瞎点出现bug
+                    let previous = 0;
+                    let now = Date.now();
+                    if(now - previous > 1000){
+                        previous = now;
+                        const group = item.getContainer();
+                        const icon = group.find((e) => e.get('name') === 'collapse-icon');
+                        icon.attr('symbol', cfg.collapsed ? G6.Marker.expand : G6.Marker.collapse);
+                    }
+                    }
+                },
+                setState(name, value, item) {
+                    const group = item.getContainer()
+                    if (name === 'collapse') {
+                      const collapseText = group.find((e) => e.get('name') === 'collapse-text');
+                      if (collapseText) {
+                        if (!value) {
+                          collapseText.attr({
+                            text: '-',
+                          });
+                        } else {
+                          collapseText.attr({
+                            text: '+',
+                          });
+                        }
+                      }
+                    }
+                    if (name === 'selected') {
+                        const nodeRect = group.find((e) => e.get('name') === 'rect-shape');
+                        if (value) {
+                        nodeRect.attr({
+                            stroke: 'green',
+                            lineWidth: 2
+                        })
+                        } else {
+                        nodeRect.attr({
+                            stroke: '#fff',
+                            lineWidth: 1
+                        })
+                        }
+                    }
+                }
+                },
+                'single-node',
+            );
+            const handleCollapse = (e) => {
+                const target = e.target;
+                const id = target.get('modelId');
+                const item = graph.findById(id);
+                const nodeModel = item.getModel();
+                nodeModel.collapsed = !nodeModel.collapsed;
+                graph.layout();
+                graph.setItemState(item, 'collapse', nodeModel.collapsed);
+              };
+            const container = document.getElementById('container');// 获取容器id
+            const width = container.clientWidth // 宽
+            const height = container.scrollHeight // 高
+            const tooltip = new G6.Tooltip({
+                offsetX: 10,
+                offsetY: 20,
+                getContent(e) {
+                    const outDiv = document.createElement('div');
+                    outDiv.style.width = '180px';
+                    outDiv.innerHTML = `
+                    <h4>自定义tooltip</h4>
+                    <ul>
+                        <li>Label: ${e.item.getModel().label || e.item.getModel().id}</li>
+                    </ul>`
+                    return outDiv
+                },
+                itemTypes: ['node']
+            });
+            const tc = document.createElement('div');
+            tc.id = 'toolbarContainer';
+            document.body.appendChild(tc);
+
+            const toolbar = new G6.ToolBar({
+                container: tc,
+                getContent: () => {
+                    return `
+                    <ul style="top: 40px">
+                        <li class="pear-btn pear-btn-success pear-btn-xs" style="width: 80px" code='download'>导出图片</li>
+                    </ul>
+                    `
+                },
+                handleClick: (code, graph) => {
+                    if (code === 'download') {
+                        graph.downloadImage('交易分析图', 'image/bmp')
+                    }
+                }
+            });
+            const graph = new G6.TreeGraph({
+                // 图的  DOM 容器，可以传入该 DOM 的 id 或者直接传入容器的 HTML 节点对象。
+                container: 'pic',
+                // 指定画布宽度，单位为 'px'
+                width,
+                // 指定画布高度，单位为 'px'
+                height:900,
+                linkCenter:false,
+                plugins: [toolbar,tooltip],
+                // 设置画布的模式
+                modes: {
+                default: [
+                    // 拖拽画布；
+                    'drag-canvas',
+                    // // 缩放画布；
+                    'zoom-canvas',
+                    'click-select',
+                    {
+                        type: 'tooltip', // 提示框
+                        formatText(model) {
+                        // 提示框文本内容
+                        const text =  model.text2;
+                        return text;
+                        },
+                    },
+                ],
+                },
+                plugins: [toolbar],
+                // 默认状态下节点的配置，比如 type, size, color,会被写入的 data 覆盖
+                defaultNode: {
+                // 节点类型,这里是自定义节点,自己取名
+                type: 'hyit',
+                size: [100,100],
+                // 指定边连入节点的连接点的位置（相对于该节点而言），可以为空
+                anchorPoints: [
+                    [0, 0.5],
+                    [1, 0.5],
+                ],
+                },
+                // 默认状态下边的配置
+                defaultEdge: {
+                // 指定边的类型，可以是内置边的类型名称，也可以是自定义边的名称。默认为 'line'
+                type: 'cubic-horizontal',
+                // 边的样式属性
+                style: {
+                    // 边的颜色
+                    stroke: '#A3B1BF',
+                    // 开始箭头
+                    startArrow: {
+                    path: G6.Arrow.circle(2, 2), // 内置样式
+                    fill: '#A3B1BF', // 颜色
+                    d: 4, // 偏移距离
+                    },
+                    // 结束箭头
+                    endArrow: {
+                    path: 'M 0,0 L 5,4 L 5,-4 Z', // 自定义样式
+                    fill: '#A3B1BF',
+                    d: 3,
+                    },
+                },
+                },
+                // 布局配置项，使用 type 字段指定使用的布局方式
+                layout: {
+                // 布局名称
+                type: 'compactBox',
+                direction: 'H',
+                // 判断节点向左还是向右
+                getSide: (d) => {
+                    if (d.data.direction == '2') {
+                    return 'right';
+                    }
+                    return 'left';
+                },
+                // 节点 id 的回调函数
+                getId: function getId(d) {
+                    return d.id;
+                },
+                // 节点高度的回调函数
+                getHeight: function getHeight() {
+                    return 40;
+                },
+                // 节点宽度的回调函数
+                getWidth: function getWidth() {
+                    return 20;
+                },
+                // 节点纵向间距的回调函数
+                getVGap: function getVGap() {
+                    return 28;
+                },
+                // 节点横向间距的回调函数
+                getHGap: function getHGap() {
+                    return 100;
+                },
+                },
+                // 动画
+                animate: true,
+            });
+            if(!_this.dataList2.children){
+                console.log(_this.dataList2)
+                layui.loading.Load(4, "")
+                // 初始化的图数据
+                graph.data(this.dataList)
+                _this.type = '交易哈希号';
+                _this.type1 = '输出/输出交易';
+                _this.type2 = '交易时间';
+                layui.loading.loadRemove()
+                // 根据提供的数据渲染视图。
+                graph.render();
+                // 缩放视窗窗口到一个固定比例
+                graph.zoomTo(1);
+                // 平移图到中心将对齐到画布中心，但不缩放
+                graph.fitCenter();
+                // 点击动态加入节点
+                // 因为数据量过大,在用户点击展开时才请求获取数据
+                // 数据源里要有唯一字段 id ,不加 id g6会自动生成id,会有一些bug
+                graph.on('node:dblclick', async (e) => {
+                    const item = e.item;
+                    const nodeId = item.get('id');
+                    const model = item.getModel();
+                    const children = model.children;
+                    // 没有子集加入数据
+                    if ( model.isSpread){
+                        _this.txhash= model.txhash;
+                        _this.direction= model.direction;
+                        _this.spent_txid = model.spent_txid;
+                        _this.received_txid = model.received_txid;
+                        _this.target = _this.received_txid
+                        await _this.getData().then(layui.loading.Load(4, ""));
+                        // 不加加定时器获取不到数据
+                        setTimeout(() =>{
+                            graph.addChild(_this.dataList2, nodeId);
+                            layui.loading.loadRemove();
+                        },200)
+                        // 针对唯一id 避免多次展开
+                        model.isSpread = false;
+                        this.count += 1
+                    }
+                });
+                graph.on('node:click',async(e)=>{
+                    const item = e.item;
+                    const nodeId = item.get('id');
+                    const model = item.getModel();
+                    const children = model.children;
+                    var tab = document.getElementById('inout');
+                    if(model.text1 == 'BTC-TXID'){
+                        _this.type = '交易哈希号';
+                        _this.type1 = '流入/流出交易';
+                        _this.type2 = '交易时间';
+                        _this.type3 = '手续费';
+                        _this.txid=model.text2;
+                        tab.style.display = 'inline'
+                        await _this.getDetail();
+                    }if(model.text1 == 'BTC-ADDRESS'){
+                        _this.address = model.text2;
+                        _this.type = '交易地址';
+                        _this.type1 = '钱包余额';
+                        _this.type2 = '花费时间';
+                        _this.type3 = '接收时间';
+                        tab.style.display = 'none'
+                        await _this.getDetail();
+                    }
+                    this.target_copy = model.text2;
+                    this.target = fittingString(model.text2,130,12);
+                    this.value = model.text3;
+                    var card = document.getElementById('card')
+                    card.style.display = 'flex';
+
+                })
+            };
+            graph.on('node:click', (e) => {
+                // 先将所有当前有 click 状态的节点的 click 状态置为 false
+                const clickNodes = graph.findAllByState('node', 'click');
+                clickNodes.forEach((cn) => {
+                    graph.setItemState(cn, 'click', false);
+                });
+                const nodeItem = e.item;
+                // 设置目标节点的 click 状态 为 true
+                graph.setItemState(nodeItem, 'click', true);
+                // graph.downloadImage();
+            });
+            // 改变+ -
+            graph.on('collapse-text:click', (e) => {
+                handleCollapse(e);
+             });
+            graph.on('collapse-back:click', (e) => {
+                handleCollapse(e);
+              });
+            setTimeout(() => {
+            // todo 浏览器窗口发生变化时
+            window.onresize = function () {
+            // todo 获取div parentContent 的宽度和高度
+            this.canvasWidth = _this.$refs.parentContent.clientWidth
+            this.canvasHeight = _this.$refs.parentContent.clientHeight
+            // todo 修改画布的大小
+            graph.changeSize(this.canvasWidth, this.canvasHeight)
+            // todo 将图移动到画布中心位置
+            graph.fitCenter()
+            }
+            }, 20)
+            if (typeof window !== 'undefined'){
+                window.onresize = () => {
+                if (!graph || graph.get('destroyed')) return;
+                if (!container || !container.scrollWidth || !container.scrollHeight) return;
+                graph.changeSize(container.scrollWidth, container.scrollHeight);
+                }
+            }
+            // 背景字
+            graph.setTextWaterMarker(['淮阴工学院', 'HYIT']);
+            },
+        }
+            })
+        storage.removeItem('spreadNum_default');
+        storage.removeItem('spreadNum_now');
+    </script>
+
+
+    <script>
+        function func(e) {
+            address = e;
+            window.location.href= 'txid_analysis.html?value=' + address;
+        }
+    </script>
+
+    <script>
+        var shownBoolean =  true
+        var btn = document.getElementById('hide')
+        var card = document.getElementById('card')
+        btn.addEventListener('click', function() {
+                card.style.display = 'none';
+
+        })
+    </script>
+
+    <style>
+        .g6-tooltip {
+            border: 1px solid #e2e2e2;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #545454;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 10px 8px;
+            box-shadow: rgb(174, 174, 174) 0px 0px 10px;
+        }
+        .load-div {
+            width: 100%;
+            height: 300px;
+            background-color: lightgray;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        #graph{
+             background: #ffbaba;
+        }
+        #cotainer{
+            height: 800px; background: #ffbaba;
+        }
+        #hide{
+            float: right;
+            margin:0;
+            font-size: 25px;
+        }
+    </style>
+</body>
+</html>

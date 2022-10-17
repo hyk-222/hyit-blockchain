@@ -97,7 +97,7 @@
 							</select>
 						</div>
 						<div class="layui-col-md12">
-							<select name="city" lay-filter="a" lay-verify="required">
+							<select name="city" lay-verify="">
 								<option value="">请选择一个城市</option>
 								<option value="010">北京</option>
 								<option value="021">上海</option>
@@ -169,17 +169,9 @@
 		<script src="../../component/pear/pear.js"></script>
 		<script>
 			layui.use(['form','element','code'], function() {
-				form = layui.form;
+				var form = layui.form;
 				var element = layui.element;
-        var form = layui.form
-            layui.form.on('select(a)', function(data){ 
-				// console.log(document.getElementById("a"))
-                console.log(data); //得到select原始DOM对象     
-                // console.log(data.value); //得到被选中的值             
-                // console.log(data.elem[data.elem.selectedIndex].text); //option的内容
-                // console.log(data.elem[data.elem.selectedIndex].title); //option的title
-                // console.log(form)
-            });
+				
 				layui.code();
 
 			});

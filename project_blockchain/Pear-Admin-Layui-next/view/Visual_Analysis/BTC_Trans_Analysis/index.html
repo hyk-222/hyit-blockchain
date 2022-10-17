@@ -24,7 +24,8 @@
 				<form method="get" target="_self">
 					<input class="wd" id="searchinfo" type="text" placeholder="请输入要查询的交易哈希" name="hash_query"
 						x-webkit-speech lang="zh-CN">
-					<button id="searchbtn" type="button"><i class="fab fa-sistrix"></i></button> 
+					<button id="searchbtn" type="button"><i
+							class="fab fa-sistrix"></i></button>   <!--onclick="searchbtn()"-->
 				</form>
 				<div class="t1">
 					<span style="font-size:18px"></span>
@@ -33,19 +34,45 @@
 		</div>
 		<script src="../../../component/layui/layui.js"></script>
 		<script src="../../../component/pear/pear.js"></script>
-		
-		</script>
-				<script type="text/javascript">
-					layui.use(['jquery','layer'], function() {
+		<script>
+			// layui.use(['jquery','layer'], function() {
+			// 	var $ = layui.jquery;
+			//
+			// 	$("#searchbtn").click(function(data){
+			// 		var data = {};
+			// 	 	data.upload_name = $('#upload_name').val();
+			// 		this.data=data;
+			// 		console.log(data.hash_query)
+			//
+			// 		window.location = '../../../view/Visual_Analysis/BTC_Trans_Analysis/Judge_Result.html'
+			// 		table.reload('user-table', {
+			// 				url: 'http://127.0.0.1:8000/transaction_search2',
+			// 	   			type: 'post',
+			// 				page: {
+			// 					curr: 1
+			// 				}
+			// 				, where:data.field
+			// 			}, 'data');
+			//
+			//
+			// 	return false;
+			// });
+			//
+			//
+			// })
+			layui.use(['jquery','layer'], function() {
 						var $ = layui.jquery;
 						var infoInput = document.getElementById('searchinfo');
-		
+
 						$("#searchbtn").click(function(){
 							if(infoInput.value.length<50){
 							window.location.href = '../../error/500.html'
-							}else{window.location.href = '../../console/txid_analysis.html?value='+ infoInput.value}
+							}else{window.location.href = '../../../view/Visual_Analysis/BTC_Trans_Analysis/Judge_Result.html?value='+ infoInput.value}
 						})
 					})
+		</script>
+		<script>
+			document.getElementById("biaoti").style.color="white";
 		</script>
 
 	</body>
